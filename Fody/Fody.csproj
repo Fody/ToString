@@ -65,6 +65,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions\ICustomAttributeProviderExtensions.cs" />
     <Compile Include="Extensions\MethodReferenceExtensions.cs" />
     <Compile Include="Extensions\TypeDefinitionExtensions.cs" />
     <Compile Include="ModuleWeaver.cs" />

@@ -38,7 +38,6 @@ public class IntegrationTests
                               {
                                   ModuleDefinition = moduleDefinition,
                                   AssemblyResolver = assemblyResolver,
-                                  LogWarning =s => warnings.Add(s)
                               };
 
         weavingTask.Execute();

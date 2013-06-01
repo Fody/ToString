@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
-    <id>Fody.ToString</id>
+    <id>ToString.Fody</id>
     <version>$version$</version>
     <title>ToString.Fody</title>
     <authors>Rafał Jasica</authors>
@@ -9,7 +9,7 @@
     <licenseUrl>http://www.opensource.org/licenses/mit-license.php</licenseUrl>
     <projectUrl>http://github.com/rjasica/Fody.ToString</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <iconUrl>https://github.com/rjasica/Fody.ToString/master/Icons/package_icon.png</iconUrl>
+    <iconUrl>https://raw.github.com/rjasica/Fody.ToString/master/Icons/package_icon.png</iconUrl>
     <description>Generate ToString method from public properties.</description>
     <language>en-UK</language>
     <tags>ToString, Formatting, ILWeaving, Fody, Cecil</tags>

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using Mono.Cecil;
-using Mono.Cecil.Cil;
+﻿using Mono.Cecil;
 
 public static class MethodReferenceExtensions
 {

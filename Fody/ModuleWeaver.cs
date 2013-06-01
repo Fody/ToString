@@ -9,17 +9,9 @@ using Mono.Collections.Generic;
 
 public class ModuleWeaver
 {
-    public Action<string> LogInfo { get; set; }
-    public Action<string> LogWarning { get; set; }
     public ModuleDefinition ModuleDefinition { get; set; }
     public IAssemblyResolver AssemblyResolver { get; set; }
     public XElement Config { get; set; }
-
-    public ModuleWeaver()
-    {
-        LogInfo = Console.WriteLine;
-        LogWarning = Console.WriteLine;
-    }
 
     public IEnumerable<TypeDefinition> GetMachingTypes()
     {
@@ -32,6 +24,8 @@ public class ModuleWeaver
         {
             AddToString(type);
         }
+
+        this.RemoveReference();
     }
 
     private PropertyDefinition[] GetPublicProperties(TypeDefinition type)
@@ -62,6 +56,8 @@ public class ModuleWeaver
         this.AddEndCode(body);
 
         type.Methods.Add(method);
+
+        type.RemoveToStringttribute();
     }
 
     private void AddEndCode(MethodBody body)
@@ -113,7 +109,7 @@ public class ModuleWeaver
             sb.Append(property.Name);
             sb.Append(": ");
 
-            if (AddQuotes(property))
+            if (HaveToAddQuotes(property))
             {
                 sb.Append('"');
             }
@@ -122,7 +118,7 @@ public class ModuleWeaver
             sb.Append(i);
             sb.Append("}");
 
-            if (AddQuotes(property))
+            if (HaveToAddQuotes(property))
             {
                 sb.Append('"');
             }
@@ -137,8 +133,17 @@ public class ModuleWeaver
         return format;
     }
 
-    private static bool AddQuotes(PropertyDefinition property)
+    private static bool HaveToAddQuotes(PropertyDefinition property)
     {
         return property.PropertyType.Name == "String";
+    }
+
+    private void RemoveReference()
+    {
+        var referenceToRemove = ModuleDefinition.AssemblyReferences.FirstOrDefault(x => x.Name == "ToString");
+        if (referenceToRemove != null)
+        {
+            ModuleDefinition.AssemblyReferences.Remove(referenceToRemove);
+        }
     }
 }
