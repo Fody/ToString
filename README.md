@@ -23,7 +23,6 @@ There is a nuget package avaliable here http://nuget.org/packages/ToString.Fody/
 
 ## What gets compiled
 
-    [ToString]
     class TestClass
     {
         public int Foo { get; set; }
