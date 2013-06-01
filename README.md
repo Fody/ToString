@@ -39,3 +39,6 @@ There is a nuget package avaliable here http://nuget.org/packages/ToString.Fody/
         }
     }
 
+## Icon
+
+Icon courtesy of [The Noun Project](http://thenounproject.com)
