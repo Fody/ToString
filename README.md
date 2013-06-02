@@ -21,7 +21,7 @@ There is a nuget package avaliable here http://nuget.org/packages/ToString.Fody/
         public double Bar { get; set; }
         
         [IgnoerDuringToString]
-        public string { get; set; }
+        public string Baz { get; set; }
     }
 
 ## What gets compiled
@@ -32,7 +32,7 @@ There is a nuget package avaliable here http://nuget.org/packages/ToString.Fody/
 
         public double Bar { get; set; }
         
-        public string { get; set; }
+        public string Baz { get; set; }
         
         public override string ToString()
         {
