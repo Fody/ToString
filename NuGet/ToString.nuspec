@@ -7,9 +7,9 @@
     <authors>Rafał Jasica</authors>
     <owners>Rafał Jasica</owners>
     <licenseUrl>http://www.opensource.org/licenses/mit-license.php</licenseUrl>
-    <projectUrl>http://github.com/rjasica/Fody.ToString</projectUrl>
+    <projectUrl>http://github.com/Fody/ToString</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <iconUrl>https://raw.github.com/rjasica/Fody.ToString/master/Icons/package_icon.png</iconUrl>
+    <iconUrl>https://raw.github.com/Fody/ToString/master/Icons/package_icon.png</iconUrl>
     <description>Generate ToString method from public properties.</description>
     <language>en-UK</language>
     <tags>ToString, Formatting, ILWeaving, Fody, Cecil</tags>
