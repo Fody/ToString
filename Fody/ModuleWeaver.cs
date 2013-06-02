@@ -39,7 +39,9 @@ public class ModuleWeaver
         var strType = ModuleDefinition.TypeSystem.String;
         var method = new MethodDefinition("ToString", methodAttributes, strType);
         method.Body.Variables.Add(new VariableDefinition(new ArrayType(ModuleDefinition.TypeSystem.Object)));
-        var properties = GetPublicProperties(type);
+        var allProperties = GetPublicProperties(type);
+        var properties = RemoveIgnoredProperties(allProperties);
+
 
         var format = GetFormatString(type, properties);
 
@@ -57,7 +59,7 @@ public class ModuleWeaver
 
         type.Methods.Add(method);
 
-        type.RemoveToStringttribute();
+        this.RemoveFodyAttributes(type, allProperties);
     }
 
     private void AddEndCode(MethodBody body)
@@ -145,5 +147,19 @@ public class ModuleWeaver
         {
             ModuleDefinition.AssemblyReferences.Remove(referenceToRemove);
         }
+    }
+
+    private void RemoveFodyAttributes(TypeDefinition type, PropertyDefinition[] allProperties)
+    {
+        type.RemoveAttribute("ToStringAttribute");
+        foreach (var property in allProperties)
+        {
+            property.RemoveAttribute("IgnoerDuringToStringAttribute");
+        }
+    }
+
+    private PropertyDefinition[] RemoveIgnoredProperties(PropertyDefinition[] allProperties)
+    {
+        return allProperties.Where(x => x.CustomAttributes.All(y => y.AttributeType.Name != "IgnoerDuringToStringAttribute")).ToArray();
     }
 }

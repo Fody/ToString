@@ -93,4 +93,18 @@ public class IntegrationTests
 
         Assert.AreEqual("{T: NestedClass, A: 10, B: \"11\", C: 12.25, D: {T: NormalClass, X: 1, Y: \"2\", Z: 4.5}}", result);
     }
+
+    [Test]
+    public void ClassWithIgnoredPropertiesTest()
+    {
+        var type = assembly.GetType("ClassWithIgnoredProperties");
+        dynamic instance = Activator.CreateInstance(type);
+        instance.Username = "user";
+        instance.Password = "pass";
+        instance.Age = 18;
+
+        var result = instance.ToString();
+
+        Assert.AreEqual("{T: ClassWithIgnoredProperties, Username: \"user\", Age: 18}", result);
+    }
 }
