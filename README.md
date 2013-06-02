@@ -19,6 +19,9 @@ There is a nuget package avaliable here http://nuget.org/packages/ToString.Fody/
         public int Foo { get; set; }
 
         public double Bar { get; set; }
+        
+        [IgnoerDuringToString]
+        public string { get; set; }
     }
 
 ## What gets compiled
