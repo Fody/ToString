@@ -16,6 +16,7 @@ TestResults
 # Build results
 [Dd]ebug/
 [Rr]elease/
+NugetBuild/
 x64/
 *_i.c
 *_p.c
@@ -23,7 +24,6 @@ x64/
 *.meta
 *.obj
 *.pch
-*.pdb
 *.pgc
 *.pgd
 *.rsp
@@ -36,6 +36,7 @@ x64/
 *.vspscc
 *.vssscc
 .builds
+
 
 # Visual C++ cache files
 ipch/
