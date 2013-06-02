@@ -32,6 +32,8 @@ There is a nuget package avaliable here http://nuget.org/packages/ToString.Fody/
 
         public double Bar { get; set; }
         
+        public string { get; set; }
+        
         public override string ToString()
         {
             return string.Format(
