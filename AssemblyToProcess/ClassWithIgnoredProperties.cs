@@ -5,6 +5,6 @@ public class ClassWithIgnoredProperties
 
     public int Age { get; set; }
 
-    [IgnoerDuringToString]
+    [IgnoreDuringToString]
     public string Password { get; set; }
 }

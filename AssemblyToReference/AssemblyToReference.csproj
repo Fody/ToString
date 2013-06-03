@@ -45,7 +45,7 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="IgnoerDuringToStringAttribute.cs" />
+    <Compile Include="IgnoreDuringToStringAttribute.cs" />
     <Compile Include="ToStringAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
