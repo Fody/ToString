@@ -20,7 +20,7 @@ There is a nuget package avaliable here http://nuget.org/packages/ToString.Fody/
 
         public double Bar { get; set; }
         
-        [IgnoerDuringToString]
+        [IgnoreDuringToString]
         public string Baz { get; set; }
     }
 
