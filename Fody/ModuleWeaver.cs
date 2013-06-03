@@ -154,12 +154,12 @@ public class ModuleWeaver
         type.RemoveAttribute("ToStringAttribute");
         foreach (var property in allProperties)
         {
-            property.RemoveAttribute("IgnoerDuringToStringAttribute");
+            property.RemoveAttribute("IgnoreDuringToStringAttribute");
         }
     }
 
     private PropertyDefinition[] RemoveIgnoredProperties(PropertyDefinition[] allProperties)
     {
-        return allProperties.Where(x => x.CustomAttributes.All(y => y.AttributeType.Name != "IgnoerDuringToStringAttribute")).ToArray();
+        return allProperties.Where(x => x.CustomAttributes.All(y => y.AttributeType.Name != "IgnoreDuringToStringAttribute")).ToArray();
     }
 }
