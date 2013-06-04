@@ -9,7 +9,7 @@ Generates ToString method from public properties for class decorated with a `[To
 
 # Nuget package
 
-There is a nuget package avaliable here http://nuget.org/packages/ToString.Fody/
+There is a nuget package available here http://nuget.org/packages/ToString.Fody/
 
 ## Your Code
 
