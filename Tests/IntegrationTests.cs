@@ -54,10 +54,11 @@ public class IntegrationTests
         instance.X = 1;
         instance.Y = "2";
         instance.Z = 4.5;
+        instance.V = 'C';
 
-        var result  = instance.ToString();        
+        var result  = instance.ToString();
 
-        Assert.AreEqual("{T: NormalClass, X: 1, Y: \"2\", Z: 4.5}", result);
+        Assert.AreEqual("{T: \"NormalClass\", X: 1, Y: \"2\", Z: 4.5, V: \"C\"}", result);
     }
 
     [Test]
@@ -71,7 +72,7 @@ public class IntegrationTests
 
         var result = instance.ToString();
 
-        Assert.AreEqual("{T: NormalStruct, X: 1, Y: \"2\", Z: 4.5}", result);
+        Assert.AreEqual("{T: \"NormalStruct\", X: 1, Y: \"2\", Z: 4.5}", result);
     }
 
     [Test]
@@ -82,6 +83,7 @@ public class IntegrationTests
         noramlInstance.X = 1;
         noramlInstance.Y = "2";
         noramlInstance.Z = 4.5;
+        noramlInstance.V = 'V';
         var nestedType = assembly.GetType("NestedClass");
         dynamic nestedInstance = Activator.CreateInstance(nestedType);
         nestedInstance.A = 10;
@@ -91,7 +93,7 @@ public class IntegrationTests
 
         var result = nestedInstance.ToString();
 
-        Assert.AreEqual("{T: NestedClass, A: 10, B: \"11\", C: 12.25, D: {T: NormalClass, X: 1, Y: \"2\", Z: 4.5}}", result);
+        Assert.AreEqual("{T: \"NestedClass\", A: 10, B: \"11\", C: 12.25, D: {T: \"NormalClass\", X: 1, Y: \"2\", Z: 4.5, V: \"V\"}}", result);
     }
 
     [Test]
@@ -105,6 +107,21 @@ public class IntegrationTests
 
         var result = instance.ToString();
 
-        Assert.AreEqual("{T: ClassWithIgnoredProperties, Username: \"user\", Age: 18}", result);
+        Assert.AreEqual("{T: \"ClassWithIgnoredProperties\", Username: \"user\", Age: 18}", result);
+    }
+
+    [Test]
+    public void NullTest()
+    {
+        var nestedType = assembly.GetType("NestedClass");
+        dynamic nestedInstance = Activator.CreateInstance(nestedType);
+        nestedInstance.A = 10;
+        nestedInstance.B = "11";
+        nestedInstance.C = 12.25;
+        nestedInstance.D = null;
+
+        var result = nestedInstance.ToString();
+
+        Assert.AreEqual("{T: \"NestedClass\", A: 10, B: \"11\", C: 12.25, D: null}", result);
     }
 }

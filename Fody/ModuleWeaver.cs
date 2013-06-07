@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Xml.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 using Mono.Collections.Generic;
 
 public class ModuleWeaver
@@ -42,7 +43,6 @@ public class ModuleWeaver
         var allProperties = GetPublicProperties(type);
         var properties = RemoveIgnoredProperties(allProperties);
 
-
         var format = GetFormatString(type, properties);
 
         var body = method.Body;
@@ -52,10 +52,11 @@ public class ModuleWeaver
         for (var i = 0; i < properties.Length; i++)
         {
             var property = properties[i];
-            AddPropertyCode(body, i, property);
+            AddPropertyCode(ins, i, property);
         }
 
         this.AddEndCode(body);
+        body.OptimizeMacros();
 
         type.Methods.Add(method);
 
@@ -83,28 +84,37 @@ public class ModuleWeaver
         ins.Add(Instruction.Create(OpCodes.Stloc_0));
     }
 
-    private static void AddPropertyCode(MethodBody body, int i, PropertyDefinition property)
+    private static void AddPropertyCode(Collection<Instruction> ins, int index, PropertyDefinition property) 
     {
-        body.Instructions.Add(Instruction.Create(OpCodes.Ldloc_0));
-        body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I4, i));
+        ins.Add(Instruction.Create(OpCodes.Ldloc_0));
+        ins.Add(Instruction.Create(OpCodes.Ldc_I4, index));
 
         var get = property.GetMethod;
-        body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
-        body.Instructions.Add(Instruction.Create(OpCodes.Call, get));
-        if (!get.ReturnType.IsByReference)
+        ins.Add(Instruction.Create(OpCodes.Ldarg_0));
+        ins.Add(Instruction.Create(OpCodes.Call, get));
+
+        var end = Instruction.Create(OpCodes.Stelem_Ref);
+        if ( get.ReturnType.IsValueType)
         {
-            body.Instructions.Add(Instruction.Create(OpCodes.Box, property.GetMethod.ReturnType));
+            ins.Add(Instruction.Create(OpCodes.Box, property.GetMethod.ReturnType));
+        }
+        else
+        {
+            ins.Add(Instruction.Create(OpCodes.Dup));
+            ins.Add(Instruction.Create(OpCodes.Brtrue, end));
+            ins.Add(Instruction.Create(OpCodes.Pop));
+            ins.Add(Instruction.Create(OpCodes.Ldstr, "null"));
         }
 
-        body.Instructions.Add(Instruction.Create(OpCodes.Stelem_Ref));
+        ins.Add(end);
     }
 
     private string GetFormatString(TypeDefinition type, PropertyDefinition[] properties)
     {
         var sb = new StringBuilder();
-        sb.Append("{{T: ");
+        sb.Append("{{T: \"");
         sb.Append(type.Name);
-        sb.Append(", ");
+        sb.Append("\", ");
         for (var i = 0; i < properties.Length; i++)
         {
             var property = properties[i];
@@ -137,7 +147,8 @@ public class ModuleWeaver
 
     private static bool HaveToAddQuotes(PropertyDefinition property)
     {
-        return property.PropertyType.Name == "String";
+        var type = property.PropertyType.FullName;
+        return type == "System.String" || type == "System.Char";
     }
 
     private void RemoveReference()
