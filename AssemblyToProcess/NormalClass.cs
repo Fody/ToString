@@ -6,4 +6,6 @@ public class NormalClass
     public string Y { get; set; }
 
     public double Z { get; set; }
+
+    public char V { get; set; }
 }
