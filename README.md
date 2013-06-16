@@ -1,5 +1,4 @@
-Fody.ToString
-=============
+![Icon](https://raw.github.com/Fody/ToString/master/Icons/package_icon.png)
 
 ## This is an add-in for [Fody](https://github.com/Fody/Fody/) 
 
