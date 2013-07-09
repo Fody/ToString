@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using Mono.Cecil;
 using NUnit.Framework;
 
@@ -123,5 +124,82 @@ public class IntegrationTests
         var result = nestedInstance.ToString();
 
         Assert.AreEqual("{T: \"NestedClass\", A: 10, B: \"11\", C: 12.25, D: null}", result);
+    }
+
+    [Test]
+    public void IntArray()
+    {
+        var type = assembly.GetType("IntCollection");
+        dynamic nestedInstance = Activator.CreateInstance(type);
+        nestedInstance.Collection = new int[] { 1, 2, 3, 4, 5, 6 };
+        nestedInstance.Count = 2;
+
+        var result = nestedInstance.ToString();
+
+        Assert.AreEqual("{T: \"IntCollection\", Count: 2, Collection: [1, 2, 3, 4, 5, 6]}", result);
+    }
+
+    [Test]
+    public void StringArray()
+    {
+        var type = assembly.GetType("StringCollection");
+        dynamic nestedInstance = Activator.CreateInstance(type);
+        nestedInstance.Collection = new List<string> { "foo", "bar" };
+        nestedInstance.Count = 2;
+
+        var result = nestedInstance.ToString();
+
+        Assert.AreEqual("{T: \"StringCollection\", Count: 2, Collection: [\"foo\", \"bar\"]}", result);
+    }
+
+    [Test]
+    public void EmptyArray()
+    {
+        var type = assembly.GetType("IntCollection");
+        dynamic nestedInstance = Activator.CreateInstance(type);
+        nestedInstance.Collection = new int[] {};
+        nestedInstance.Count = 0;
+
+        var result = nestedInstance.ToString();
+
+        Assert.AreEqual("{T: \"IntCollection\", Count: 0, Collection: []}", result);
+    }
+
+    [Test]
+    public void NullArray()
+    {
+        var type = assembly.GetType("IntCollection");
+        dynamic nestedInstance = Activator.CreateInstance(type);
+        nestedInstance.Collection = null;
+        nestedInstance.Count = 0;
+
+        var result = nestedInstance.ToString();
+
+        Assert.AreEqual("{T: \"IntCollection\", Count: 0, Collection: null}", result);
+    }
+
+    [Test]
+    public void ObjectArray()
+    {
+        var arrayType = assembly.GetType("ObjectCollection");
+        dynamic arrayInstance = Activator.CreateInstance(arrayType);
+        arrayInstance.Count = 2;
+
+        var type = assembly.GetType("NormalClass");
+        dynamic instance = Activator.CreateInstance(type);
+        instance.X = 1;
+        instance.Y = "2";
+        instance.Z = 4.5;
+        instance.V = 'C';
+
+        dynamic array = Activator.CreateInstance(type.MakeArrayType(), new object[] { 2 });
+        array[0] = instance;
+        array[1] = null;
+
+        arrayInstance.Collection = array;
+
+        var result = arrayInstance.ToString();
+
+        Assert.AreEqual("{T: \"ObjectCollection\", Count: 2, Collection: [{T: \"NormalClass\", X: 1, Y: \"2\", Z: 4.5, V: \"C\"}, null]}", result);
     }
 }

@@ -42,6 +42,9 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="ClassWithIgnoredProperties.cs" />
+    <Compile Include="StringCollection.cs" />
+    <Compile Include="ObjectCollection.cs" />
+    <Compile Include="IntCollection.cs" />
     <Compile Include="NestedClass.cs" />
     <Compile Include="NormalStruct.cs" />
     <Compile Include="NormalClass.cs" />
