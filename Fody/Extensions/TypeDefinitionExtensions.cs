@@ -8,4 +8,9 @@ public static class TypeDefinitionExtensions
     {
         return typeDefinition.Methods.First(x => x.Name == method && x.IsMatch(paramTypes));
     }
+
+    public static bool IsCollection(this TypeDefinition type)
+    {
+        return !type.Name.Equals("String") && (type.Interfaces.Any(i => i.Name.Equals("IEnumerable")));
+    }
 }
