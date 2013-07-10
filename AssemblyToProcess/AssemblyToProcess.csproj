@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="ClassWithIgnoredProperties.cs" />
+    <Compile Include="EnumClass.cs" />
     <Compile Include="StringCollection.cs" />
     <Compile Include="ObjectCollection.cs" />
     <Compile Include="IntCollection.cs" />
