@@ -376,7 +376,7 @@ public class ModuleWeaver
     private static bool HaveToAddQuotes(TypeReference type)
     {
         var name = type.FullName;
-        return name == "System.String" || name == "System.Char";
+        return name == "System.String" || name == "System.Char" || type.Resolve().IsEnum;
     }
 
     private void RemoveReference()
