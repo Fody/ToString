@@ -126,6 +126,8 @@ public class IntegrationTests
         Assert.AreEqual("{T: \"NestedClass\", A: 10, B: \"11\", C: 12.25, D: null}", result);
     }
 
+    #region Collections
+
     [Test]
     public void IntArray()
     {
@@ -202,4 +204,33 @@ public class IntegrationTests
 
         Assert.AreEqual("{T: \"ObjectCollection\", Count: 2, Collection: [{T: \"NormalClass\", X: 1, Y: \"2\", Z: 4.5, V: \"C\"}, null]}", result);
     }
+
+    #endregion
+
+    #region enums
+
+    [Test]
+    public void EmptyEnum()
+    {
+        var type = assembly.GetType("EnumClass");
+        dynamic instance = Activator.CreateInstance(type);
+
+        var result = instance.ToString();
+
+        Assert.AreEqual("{T: \"EnumClass\", NormalEnum: \"A\", FlagsEnum: \"G\"}", result);
+    }
+
+    [Test]
+    public void EnumWithValues()
+    {
+        var type = assembly.GetType("EnumClass");
+        dynamic instance = Activator.CreateInstance(type,new object[]{3,6});
+
+        var result = instance.ToString();
+
+        Assert.AreEqual("{T: \"EnumClass\", NormalEnum: \"D\", FlagsEnum: \"I, J\"}", result);
+    }
+
+
+    #endregion
 }
