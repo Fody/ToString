@@ -41,14 +41,31 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="ClassWithIgnoredProperties.cs" />
-    <Compile Include="EnumClass.cs" />
-    <Compile Include="StringCollection.cs" />
-    <Compile Include="ObjectCollection.cs" />
-    <Compile Include="IntCollection.cs" />
-    <Compile Include="NestedClass.cs" />
-    <Compile Include="NormalStruct.cs" />
-    <Compile Include="NormalClass.cs" />
+    <Compile Include="ClassWithIgnoredProperties.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EnumClass.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GenericClass.cs" />
+    <Compile Include="IntCollection.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="NestedClass.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="NormalClass.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="NormalStruct.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ObjectCollection.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="StringCollection.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AssemblyToReference\AssemblyToReference.csproj">

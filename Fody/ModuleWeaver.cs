@@ -9,6 +9,8 @@ using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
 using Mono.Collections.Generic;
 using System.Globalization;
+using System.CodeDom.Compiler;
+using System.Diagnostics;
 
 public class ModuleWeaver
 {
@@ -83,13 +85,21 @@ public class ModuleWeaver
             method.Body.Variables.Add(new VariableDefinition(new ArrayType(ModuleDefinition.TypeSystem.Object)));
         }
 
-        this.AddInitCode(ins, format, properties);
+        var genericOffset = !type.HasGenericParameters ? 0 : type.GenericParameters.Count;
+        this.AddInitCode(ins, format, properties, genericOffset);
+
+        if (type.HasGenericParameters)
+        {
+            AddGenericParameterNames(type, ins);
+        }
 
         for (var i = 0; i < properties.Length; i++)
         {
             var property = properties[i];
-            AddPropertyCode(method.Body, i, property);
+            AddPropertyCode(method.Body, i + genericOffset, property);
         }
+
+        this.AddMethodAttributes(method);
 
         this.AddEndCode(body);
         body.OptimizeMacros();
@@ -97,6 +107,47 @@ public class ModuleWeaver
         type.Methods.Add(method);
 
         this.RemoveFodyAttributes(type, allProperties);
+    }
+
+    private void AddGenericParameterNames(TypeDefinition type, Collection<Instruction> ins)
+    {
+        var typeType = ModuleDefinition.Import(typeof(Type)).Resolve();
+        var memberInfoType = ModuleDefinition.Import(typeof(System.Reflection.MemberInfo)).Resolve();
+        var getTypeMethod = this.ModuleDefinition.Import(ModuleDefinition.TypeSystem.Object.Resolve().FindMethod("GetType"));
+        var getGenericArgumentsMethod = this.ModuleDefinition.Import(typeType.FindMethod("GetGenericArguments"));
+        var nameProperty = memberInfoType.Properties.Where(x => x.Name == "Name").Single();
+        var nameGet = ModuleDefinition.Import(nameProperty.GetMethod);
+
+        for (var i = 0; i < type.GenericParameters.Count; i++)
+        {
+            ins.Add(Instruction.Create(OpCodes.Ldloc_0));
+            ins.Add(Instruction.Create(OpCodes.Ldc_I4, i));
+
+            ins.Add(Instruction.Create(OpCodes.Ldarg_0));
+            ins.Add(Instruction.Create(OpCodes.Callvirt, getTypeMethod));
+            ins.Add(Instruction.Create(OpCodes.Callvirt, getGenericArgumentsMethod));
+            ins.Add(Instruction.Create(OpCodes.Ldc_I4, i));
+            ins.Add(Instruction.Create(OpCodes.Ldelem_Ref));
+            ins.Add(Instruction.Create(OpCodes.Callvirt, nameGet));
+
+            ins.Add(Instruction.Create(OpCodes.Stelem_Ref));
+        }
+    }
+
+    private void AddMethodAttributes(MethodDefinition method)
+    {
+        var generatedConstructor = ModuleDefinition.Import(typeof(GeneratedCodeAttribute).GetConstructor(new[] { typeof(string), typeof(string) }));
+
+        var version = typeof(ModuleWeaver).Assembly.GetName().Version.ToString();
+
+        var generatedAttribute = new CustomAttribute(generatedConstructor);
+        generatedAttribute.ConstructorArguments.Add(new CustomAttributeArgument(ModuleDefinition.TypeSystem.String, "Fody.ToString"));
+        generatedAttribute.ConstructorArguments.Add(new CustomAttributeArgument(ModuleDefinition.TypeSystem.String, version));
+        method.CustomAttributes.Add(generatedAttribute);
+
+        var debuggerConstructor = ModuleDefinition.Import(typeof(DebuggerNonUserCodeAttribute).GetConstructor(Type.EmptyTypes));
+        var debuggerAttribute = new CustomAttribute(debuggerConstructor);
+        method.CustomAttributes.Add(debuggerAttribute);
     }
 
     private void AddEndCode(MethodBody body)
@@ -108,14 +159,14 @@ public class ModuleWeaver
         body.Instructions.Add(Instruction.Create(OpCodes.Ret));
     }
 
-    private void AddInitCode(Collection<Instruction> ins, string format, PropertyDefinition[] properties)
+    private void AddInitCode(Collection<Instruction> ins, string format, PropertyDefinition[] properties, int genericOffset)
     {
         var cultureInfoType = ModuleDefinition.Import(typeof(CultureInfo)).Resolve();
         var invariantCulture = cultureInfoType.Properties.Single(x => x.Name == "InvariantCulture");
         var getInvariantCulture = ModuleDefinition.Import(invariantCulture.GetMethod);
         ins.Add(Instruction.Create(OpCodes.Call, getInvariantCulture));
         ins.Add(Instruction.Create(OpCodes.Ldstr, format));
-        ins.Add(Instruction.Create(OpCodes.Ldc_I4, properties.Length));
+        ins.Add(Instruction.Create(OpCodes.Ldc_I4, properties.Length + genericOffset));
         ins.Add(Instruction.Create(OpCodes.Newarr, this.ModuleDefinition.TypeSystem.Object));
         ins.Add(Instruction.Create(OpCodes.Stloc_0));
     }
@@ -127,7 +178,27 @@ public class ModuleWeaver
         ins.Add(Instruction.Create(OpCodes.Ldloc_0));
         ins.Add(Instruction.Create(OpCodes.Ldc_I4, index));
 
-        var get = property.GetMethod;
+        MethodReference get = null;
+
+        if (property.DeclaringType.HasGenericParameters)
+        {
+            var type = property.DeclaringType;
+            var t = type.GenericParameters[0];
+            var of_t = new GenericInstanceType(type);
+            of_t.GenericArguments.Add(t);
+
+            var field_of_t = new MethodReference(property.GetMethod.Name, property.GetMethod.ReturnType)
+            {
+                DeclaringType = of_t,
+                HasThis = true
+            };
+            get = field_of_t;
+        }
+        else
+        {
+            get = property.GetMethod;
+        }
+            
         ins.Add(Instruction.Create(OpCodes.Ldarg_0));
         ins.Add(Instruction.Create(OpCodes.Call, get));
 
@@ -341,8 +412,32 @@ public class ModuleWeaver
     {
         var sb = new StringBuilder();
         sb.Append("{{T: \"");
-        sb.Append(type.Name);
+        int offset = 0;
+        if (!type.HasGenericParameters)
+        {
+            sb.Append(type.Name);
+        }
+        else
+        {
+            var name = type.Name.Remove(type.Name.IndexOf('`'));
+            offset = type.GenericParameters.Count;
+            sb.Append(name);
+            sb.Append('<');
+            for (var i = 0; i < offset; i++)
+            {
+                sb.Append("{");
+                sb.Append(i);
+                sb.Append("}");
+                if (i + 1 != offset)
+                {
+                    sb.Append(", ");
+                }
+            }
+            sb.Append('>');
+        }
         sb.Append("\", ");
+
+
         for (var i = 0; i < properties.Length; i++)
         {
             var property = properties[i];
@@ -355,7 +450,7 @@ public class ModuleWeaver
             }
 
             sb.Append('{');
-            sb.Append(i);
+            sb.Append(i + offset);
             sb.Append("}");
 
             if (HaveToAddQuotes(property.PropertyType))
@@ -376,7 +471,13 @@ public class ModuleWeaver
     private static bool HaveToAddQuotes(TypeReference type)
     {
         var name = type.FullName;
-        return name == "System.String" || name == "System.Char" || type.Resolve().IsEnum;
+        if(name == "System.String" || name == "System.Char")
+        {
+            return true;
+        }
+
+        var resolved = type.Resolve();
+        return  resolved != null && resolved.IsEnum;
     }
 
     private void RemoveReference()

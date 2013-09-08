@@ -205,6 +205,28 @@ public class IntegrationTests
         Assert.AreEqual("{T: \"ObjectCollection\", Count: 2, Collection: [{T: \"NormalClass\", X: 1, Y: \"2\", Z: 4.5, V: \"C\"}, null]}", result);
     }
 
+    [Test]
+    public void GenericClassWithCollection()
+    {
+        var genericClassType = assembly.GetType("GenericClass`1");
+        var propType = assembly.GetType("GenericClassNormalClass");
+        var instanceType = genericClassType.MakeGenericType(propType);
+
+        dynamic instance = Activator.CreateInstance(instanceType);
+        instance.A = 1;
+
+        dynamic propInstance = Activator.CreateInstance(propType);
+
+        dynamic array = Activator.CreateInstance(propType.MakeArrayType(), new object[] { 1 });
+        array[0] = propInstance;
+
+        instance.B = array;
+
+        var result = instance.ToString();
+
+        Assert.AreEqual("{T: \"GenericClass<GenericClassNormalClass>\", A: 1, B: [{T: \"GenericClassNormalClass\", D: 0}]}", result);
+    }
+
     #endregion
 
     #region enums
