@@ -11,6 +11,7 @@ using Mono.Collections.Generic;
 using System.Globalization;
 using System.CodeDom.Compiler;
 using System.Diagnostics;
+using ToString.Fody.Extensions;
 
 public class ModuleWeaver
 {
@@ -64,7 +65,7 @@ public class ModuleWeaver
         var strType = ModuleDefinition.TypeSystem.String;
         var method = new MethodDefinition("ToString", methodAttributes, strType);
         method.Body.Variables.Add(new VariableDefinition(new ArrayType(ModuleDefinition.TypeSystem.Object)));
-        var allProperties = GetPublicProperties(type);
+        var allProperties = type.GetProperties();
         var properties = RemoveIgnoredProperties(allProperties);
 
         var format = GetFormatString(type, properties);
@@ -96,7 +97,7 @@ public class ModuleWeaver
         for (var i = 0; i < properties.Length; i++)
         {
             var property = properties[i];
-            AddPropertyCode(method.Body, i + genericOffset, property);
+            AddPropertyCode(method.Body, i + genericOffset, property, type);
         }
 
         this.AddMethodAttributes(method);
@@ -171,33 +172,14 @@ public class ModuleWeaver
         ins.Add(Instruction.Create(OpCodes.Stloc_0));
     }
 
-    private void AddPropertyCode(MethodBody body, int index, PropertyDefinition property)
+    private void AddPropertyCode(MethodBody body, int index, PropertyDefinition property, TypeDefinition targetType)
     {
         var ins = body.Instructions;
 
         ins.Add(Instruction.Create(OpCodes.Ldloc_0));
         ins.Add(Instruction.Create(OpCodes.Ldc_I4, index));
 
-        MethodReference get = null;
-
-        if (property.DeclaringType.HasGenericParameters)
-        {
-            var type = property.DeclaringType;
-            var t = type.GenericParameters[0];
-            var of_t = new GenericInstanceType(type);
-            of_t.GenericArguments.Add(t);
-
-            var field_of_t = new MethodReference(property.GetMethod.Name, property.GetMethod.ReturnType)
-            {
-                DeclaringType = of_t,
-                HasThis = true
-            };
-            get = field_of_t;
-        }
-        else
-        {
-            get = property.GetMethod;
-        }
+        MethodReference get = property.GetGetMethod(targetType);
             
         ins.Add(Instruction.Create(OpCodes.Ldarg_0));
         ins.Add(Instruction.Create(OpCodes.Call, get));
@@ -451,6 +433,12 @@ public class ModuleWeaver
 
             sb.Append('{');
             sb.Append(i + offset);
+
+            if (property.PropertyType.FullName == "System.DateTime")
+            {
+                sb.Append(":O");
+            }
+
             sb.Append("}");
 
             if (HaveToAddQuotes(property.PropertyType))
@@ -471,7 +459,7 @@ public class ModuleWeaver
     private static bool HaveToAddQuotes(TypeReference type)
     {
         var name = type.FullName;
-        if(name == "System.String" || name == "System.Char")
+        if(name == "System.String" || name == "System.Char" || name == "System.DateTime")
         {
             return true;
         }

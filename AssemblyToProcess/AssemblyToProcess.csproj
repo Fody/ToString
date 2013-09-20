@@ -47,7 +47,9 @@
     <Compile Include="EnumClass.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GenericClass.cs" />
+    <Compile Include="GenericClass.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="IntCollection.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -60,6 +62,7 @@
     <Compile Include="NormalStruct.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="NullableClass.cs" />
     <Compile Include="ObjectCollection.cs">
       <SubType>Code</SubType>
     </Compile>

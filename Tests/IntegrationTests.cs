@@ -216,6 +216,8 @@ public class IntegrationTests
         instance.A = 1;
 
         dynamic propInstance = Activator.CreateInstance(propType);
+        propInstance.D = 2;
+        propInstance.C = 3;
 
         dynamic array = Activator.CreateInstance(propType.MakeArrayType(), new object[] { 1 });
         array[0] = propInstance;
@@ -224,7 +226,50 @@ public class IntegrationTests
 
         var result = instance.ToString();
 
-        Assert.AreEqual("{T: \"GenericClass<GenericClassNormalClass>\", A: 1, B: [{T: \"GenericClassNormalClass\", D: 0}]}", result);
+        Assert.AreEqual("{T: \"GenericClass<GenericClassNormalClass>\", A: 1, B: [{T: \"GenericClassNormalClass\", D: 2, C: 3}]}", result);
+    }
+
+    [Test]
+    public void WithoutGenericParameter()
+    {
+        var withoutGenericParameterType = assembly.GetType("WithoutGenericParameter");
+        var propType = assembly.GetType("GenericClassNormalClass");
+
+        dynamic instance = Activator.CreateInstance(withoutGenericParameterType);
+        instance.Z = 12;
+        instance.A = 1;
+        dynamic propInstance = Activator.CreateInstance(propType);
+        propInstance.D = 3;
+        propInstance.C = -4;
+        dynamic array = Activator.CreateInstance(propType.MakeArrayType(), new object[] { 1 });
+        array[0] = propInstance;
+        instance.B = array;
+
+        var result = instance.ToString();
+
+        Assert.AreEqual("{T: \"WithoutGenericParameter\", Z: 12, A: 1, B: [{T: \"GenericClassNormalClass\", D: 3, C: -4}]}", result);
+    }
+
+    [Test]
+    public void WithGenericParameter()
+    {
+        var withGenericParameterType = assembly.GetType("WithGenericParameter`1");
+        var propType = assembly.GetType("GenericClassNormalClass");
+        var instanceType = withGenericParameterType.MakeGenericType(propType);
+
+        dynamic instance = Activator.CreateInstance(instanceType);
+        instance.X = 12;
+        instance.A = 1;
+        dynamic propInstance = Activator.CreateInstance(propType);
+        propInstance.D = 3;
+        propInstance.C = 4;
+        dynamic array = Activator.CreateInstance(propType.MakeArrayType(), new object[] { 1 });
+        array[0] = propInstance;
+        instance.B = array;
+
+        var result = instance.ToString();
+
+        Assert.AreEqual("{T: \"WithGenericParameter<GenericClassNormalClass>\", X: 12, A: 1, B: [{T: \"GenericClassNormalClass\", D: 3, C: 4}]}", result);
     }
 
     #endregion

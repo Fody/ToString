@@ -3,14 +3,21 @@ using System.Globalization;
 using System;
 
 [ToString]
+public class WithGenericParameter<T> : GenericClass<T> where T : GenericClassBaseClass
+{
+    public int X { get; set; }
+}
+
+[ToString]
+public class WithoutGenericParameter : GenericClass<GenericClassBaseClass>
+{
+    public int Z { get; set; }
+}
+
+[ToString]
 public class GenericClass<T> where T : GenericClassBaseClass
 {
     public int a;
-
-    public GenericClass()
-    {
-
-    }
 
     public int A 
     {
