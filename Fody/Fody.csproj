@@ -13,7 +13,7 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
-    <FodyPath>..\packages\Fody.1.13.12</FodyPath>
+    <FodyPath>..\packages\Fody.1.17.4.0</FodyPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -42,6 +42,11 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="Fody.targets" />
+    <None Include="NugetAssets\install.ps1" />
+    <None Include="NugetAssets\ToString.nuspec">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="NugetAssets\uninstall.ps1" />
     <None Include="packages.config" />
     <Reference Include="Mono.Cecil, Version=0.9.5.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -75,8 +80,30 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="FodyWeavers.xml" />
+    <Content Include="NugetAssets\Fody_ToBeDeleted.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AssemblyToReference\AssemblyToReference.csproj">
+      <Project>{70804914-c3d9-4737-bcb8-b3d40f305db3}</Project>
+      <Name>AssemblyToReference</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(ProjectPath)\..\..\Tools\Pepita\PepitaGet.targets" />
+  <UsingTask TaskName="PepitaPackage.WeavingTask" AssemblyFile="$(SolutionDir)Tools\Pepita\PepitaPackage.dll" />
+  <Target Name="AfterBuild">
+    <ItemGroup>
+      <FilesToDelete Include="$(SolutionDir)NuGetBuild\**\*.*" />
+    </ItemGroup>
+    <Delete Files="@(FilesToDelete)" />
+    <MakeDir Directories="$(SolutionDir)NuGetBuild" />
+    <Copy SourceFiles="$(ProjectDir)NuGetAssets\Fody_ToBeDeleted.txt" DestinationFolder="$(SolutionDir)NuGetBuild\Content" />
+    <Copy SourceFiles="$(ProjectDir)NuGetAssets\ToString.nuspec" DestinationFolder="$(SolutionDir)NuGetBuild" />
+    <Copy SourceFiles="$(ProjectDir)NuGetAssets\install.ps1" DestinationFolder="$(SolutionDir)NuGetBuild\Tools" />
+    <Copy SourceFiles="$(ProjectDir)NuGetAssets\uninstall.ps1" DestinationFolder="$(SolutionDir)NuGetBuild\Tools" />
+    <Copy SourceFiles="$(OutputPath)ToString.Fody.dll" DestinationFolder="$(SolutionDir)NuGetBuild" />
+    <Copy SourceFiles="$(OutputPath)ToString.Fody.pdb" DestinationFolder="$(SolutionDir)NuGetBuild" />
+    <Copy SourceFiles="$(SolutionDir)AssemblyToReference\bin\$(ConfigurationName)\ToString.dll" DestinationFolder="$(SolutionDir)NuGetBuild\Lib\portable-net4+sl4+wp7+win8+MonoAndroid16+MonoTouch40" />
+    <PepitaPackage.WeavingTask NuGetBuildDirectory="$(SolutionDir)NuGetBuild" MetadataAssembly="$(OutputPath)ToString.Fody.dll" />
+  </Target>
   <Import Project="Fody.targets" />
 </Project>
