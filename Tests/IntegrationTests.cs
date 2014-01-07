@@ -272,6 +272,42 @@ public class IntegrationTests
         Assert.AreEqual("{T: \"WithGenericParameter<GenericClassNormalClass>\", X: 12, A: 1, B: [{T: \"GenericClassNormalClass\", D: 3, C: 4}]}", result);
     }
 
+    [Test]
+    public void WithGenericProperty()
+    {
+        var withGenericPropertyType = assembly.GetType("WithPropertyOfGenericType`1");
+        var propType = assembly.GetType("GenericClassNormalClass");
+        var instanceType = withGenericPropertyType.MakeGenericType(propType);
+
+        dynamic instance = Activator.CreateInstance(instanceType);
+        dynamic propInstance = Activator.CreateInstance(propType);
+        instance.GP = propInstance;
+        propInstance.C = 1;
+        propInstance.D = 3;
+
+        var result = instance.ToString();
+
+        Assert.That(result, Is.EqualTo("{T: \"WithPropertyOfGenericType<GenericClassNormalClass>\", GP: {T: \"GenericClassNormalClass\", D: 3, C: 1}}"));
+    }
+
+    [Test]
+    public void WithInheritedGenericProperty()
+    {
+        var withGenericPropertyType = assembly.GetType("WithInheritedPropertyOfGenericType");
+
+        dynamic instance = Activator.CreateInstance(withGenericPropertyType);
+        var propType = assembly.GetType("GenericClassNormalClass");
+        dynamic propInstance = Activator.CreateInstance(propType);
+        instance.GP = propInstance;
+        propInstance.C = 1;
+        propInstance.D = 3;
+        instance.X = 6;
+
+        var result = instance.ToString();
+
+        Assert.That(result, Is.EqualTo("{T: \"WithInheritedPropertyOfGenericType\", X: 6, GP: {T: \"GenericClassNormalClass\", D: 3, C: 1}}"));
+    }
+
     #endregion
 
     #region enums
