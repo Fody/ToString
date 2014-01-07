@@ -15,17 +15,15 @@ public class WithoutGenericParameter : GenericClass<GenericClassBaseClass>
 }
 
 [ToString]
-public class WithPropertyOfGenericType<T> : GenericClass<T> where T : GenericClassBaseClass
+public class WithPropertyOfGenericType<T> where T : GenericClassBaseClass
 {
-    public T GenericProperty { get; set; }
-
-    public IEnumerable<T> GenericCollection { get; set; } 
+    public T GP { get; set; }
 }
 
 [ToString]
 public class WithInheritedPropertyOfGenericType : WithPropertyOfGenericType<GenericClassBaseClass>
 {
-    public int OtherProperty { get; set; }
+    public int X { get; set; }
 }
 
 [ToString]
