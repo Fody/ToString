@@ -73,7 +73,7 @@ public class ModuleWeaver
         var body = method.Body;
         var ins = body.Instructions;
 
-        var hasCollections = properties.Any(x => x.PropertyType.Resolve().IsCollection());
+        var hasCollections = properties.Any(x => !x.PropertyType.IsGenericParameter && x.PropertyType.Resolve().IsCollection());
         if (hasCollections)
         {
             method.Body.Variables.Add(new VariableDefinition(stringBuilderType));
@@ -191,7 +191,7 @@ public class ModuleWeaver
         else
         {
             var propType = property.PropertyType.Resolve();
-            var isCollection = propType.IsCollection();
+            var isCollection = !property.PropertyType.IsGenericParameter && propType.IsCollection();
 
             if (isCollection)
             {
