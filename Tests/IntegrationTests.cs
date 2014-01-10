@@ -126,6 +126,19 @@ public class IntegrationTests
         Assert.AreEqual("{T: \"NestedClass\", A: 10, B: \"11\", C: 12.25, D: null}", result);
     }
 
+    [Test]
+    public void ClassWithParentInAnotherAssembly()
+    {
+        var derivedType = assembly.GetType("Child");
+        dynamic instance = Activator.CreateInstance(derivedType);
+        instance.InParent = 10;
+        instance.InChild = 5;
+
+        var result = instance.ToString();
+
+        Assert.That(result, Is.EqualTo("{T: \"Child\", InParent: 10, InChild: 5}"));
+    }
+
     #region Collections
 
     [Test]
