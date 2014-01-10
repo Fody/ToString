@@ -76,6 +76,10 @@
       <Project>{70804914-c3d9-4737-bcb8-b3d40f305db3}</Project>
       <Name>AssemblyToReference</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ReferencedDependency\ReferencedDependency.csproj">
+      <Project>{34899A51-EFEA-4688-805F-0354166FCA09}</Project>
+      <Name>ReferencedDependency</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
 </Project>
