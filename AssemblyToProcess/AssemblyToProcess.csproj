@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Child.cs" />
     <Compile Include="ClassWithIgnoredProperties.cs">
       <SubType>Code</SubType>
     </Compile>
