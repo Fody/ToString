@@ -136,7 +136,24 @@ public class IntegrationTests
 
         var result = instance.ToString();
 
-        Assert.That(result, Is.EqualTo("{T: \"Child\", InParent: 10, InChild: 5}"));
+        Assert.That(result, Is.EqualTo("{T: \"Child\", InChild: 5, InParent: 10}"));
+    }
+
+    [Test]
+    public void ComplexClassWithParentInAnotherAssembly()
+    {
+        var derivedType = assembly.GetType("ComplexChild");
+        dynamic instance = Activator.CreateInstance(derivedType);
+        instance.InChildNumber = 1L;
+        instance.InChildText = "2";
+        instance.InChildCollection  = new int[] {3};
+        instance.InParentNumber = 4L;
+        instance.InParentText = "5";
+        instance.InParentCollection  = new int[] {6};
+
+        var result = instance.ToString();
+
+        Assert.That(result, Is.EqualTo("{T: \"ComplexChild\", InChildNumber: 1, InChildText: \"2\", InChildCollection: [3], InParentNumber: 4, InParentText: \"5\", InParentCollection: [6]}"));
     }
 
     #region Collections

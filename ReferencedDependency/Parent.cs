@@ -9,4 +9,13 @@ namespace ReferencedDependency
     {
         public long InParent { get; set; }
     }
+
+    public class ComplexParent
+    {
+        public long InParentNumber { get; set; }
+
+        public string InParentText { get; set; }
+
+        public IEnumerable<int> InParentCollection { get; set; }
+    }
 }

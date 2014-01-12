@@ -179,14 +179,15 @@ public class ModuleWeaver
         ins.Add(Instruction.Create(OpCodes.Ldloc_0));
         ins.Add(Instruction.Create(OpCodes.Ldc_I4, index));
 
-        MethodReference get = property.GetGetMethod(targetType);
+        MethodReference get = ModuleDefinition.Import(property.GetGetMethod(targetType));
             
         ins.Add(Instruction.Create(OpCodes.Ldarg_0));
         ins.Add(Instruction.Create(OpCodes.Call, get));
 
         if ( get.ReturnType.IsValueType)
         {
-            ins.Add(Instruction.Create(OpCodes.Box, property.GetMethod.ReturnType));
+            var returnType = ModuleDefinition.Import(property.GetMethod.ReturnType);
+            ins.Add(Instruction.Create(OpCodes.Box, returnType));
         }
         else
         {
