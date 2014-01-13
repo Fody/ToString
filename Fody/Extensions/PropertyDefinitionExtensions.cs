@@ -44,7 +44,7 @@ namespace ToString.Fody.Extensions
 
                 get = new MethodReference(property.GetMethod.Name, returnType)
                 {
-                    DeclaringType = property.Module.Import(genericInstanceType),
+                    DeclaringType = property.Module.Import(genericInstanceType.Resolve()),
                     HasThis = true
                 };
             }
