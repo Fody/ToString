@@ -26,7 +26,7 @@ namespace ToString.Fody.Extensions
                 {
                     var propertyType = property.DeclaringType.Resolve();
 
-                    while (propertyType != parent.Resolve())
+                    while (propertyType.FullName != parent.Resolve().FullName)
                     {
                         parentReference = parent.BaseType;
                         parent = parent.BaseType.Resolve();
@@ -44,7 +44,7 @@ namespace ToString.Fody.Extensions
 
                 get = new MethodReference(property.GetMethod.Name, returnType)
                 {
-                    DeclaringType = genericInstanceType,
+                    DeclaringType = property.Module.Import(genericInstanceType),
                     HasThis = true
                 };
             }
