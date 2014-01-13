@@ -156,6 +156,19 @@ public class IntegrationTests
         Assert.That(result, Is.EqualTo("{T: \"ComplexChild\", InChildNumber: 1, InChildText: \"2\", InChildCollection: [3], InParentNumber: 4, InParentText: \"5\", InParentCollection: [6]}"));
     }
 
+    [Test]
+    public void ClassWithGenericParentInAnotherAssembly()
+    {
+        var derivedType = assembly.GetType("GenericChild");
+        dynamic instance = Activator.CreateInstance(derivedType);
+        instance.InChild = "5";
+        instance.GenericInParent = 6;
+            
+        var result = instance.ToString();
+
+        Assert.That(result, Is.EqualTo("{T: \"GenericChild\", InChild: \"5\", GenericInParent: 6}"));
+    }
+
     #region Collections
 
     [Test]

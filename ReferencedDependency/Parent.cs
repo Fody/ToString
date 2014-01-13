@@ -18,4 +18,9 @@ namespace ReferencedDependency
 
         public IEnumerable<int> InParentCollection { get; set; }
     }
+
+    public class GenericParent<T>
+    {
+        public T GenericInParent { get; set; }
+    }
 }

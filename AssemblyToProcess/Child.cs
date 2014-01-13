@@ -16,3 +16,9 @@ public class ComplexChild : ComplexParent
 
     public IEnumerable<int> InChildCollection { get; set; }
 }
+
+[ToString]
+public class GenericChild : GenericParent<int>
+{
+    public string InChild { get; set; }
+}
