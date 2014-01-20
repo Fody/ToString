@@ -5,65 +5,24 @@ namespace ToString.Fody.Extensions
 {
     public static class PropertyDefinitionExtensions
     {
-        public static MethodReference GetGetMethod(this PropertyDefinition property, TypeDefinition targetType)
+        public static MethodReference GetGetMethod(this PropertyDefinition property, TypeReference targetType)
         {
-            MethodReference get;
-
-            if (property.DeclaringType.HasGenericParameters)
+            MethodReference method = property.GetMethod;
+            if (method.DeclaringType.HasGenericParameters)
             {
-                var type = property.DeclaringType;
-
-                GenericInstanceType genericInstanceType;
-
-                TypeDefinition parent = targetType;
-                TypeReference parentReference = targetType;
-
-                if (property.DeclaringType == targetType)
+                var genericInstanceType = property.DeclaringType.GetGenericInstanceType(targetType);
+                MethodReference newRef = new MethodReference(method.Name, method.ReturnType)
                 {
-                    genericInstanceType = GetGenericInstanceType(type, type.GenericParameters);
-                }
-                else
-                {
-                    var propertyType = property.DeclaringType.Resolve();
-
-                    while (propertyType.FullName != parent.Resolve().FullName)
-                    {
-                        parentReference = parent.BaseType;
-                        parent = parent.BaseType.Resolve();
-                    }
-
-                    genericInstanceType = parentReference as GenericInstanceType;
-                    if (genericInstanceType == null)
-                    {
-                        genericInstanceType = GetGenericInstanceType(type, parentReference.GenericParameters);
-                    }
-                }
-
-                TypeReference returnType = property.PropertyType;
-
-
-                get = new MethodReference(property.GetMethod.Name, returnType)
-                {
-                    DeclaringType = property.Module.Import(genericInstanceType.Resolve()),
+                    DeclaringType = genericInstanceType,
                     HasThis = true
                 };
+
+                return newRef;
             }
             else
             {
-                get = property.GetMethod;
+                return method;
             }
-
-            return get;
-        }
-
-        private static GenericInstanceType GetGenericInstanceType(TypeDefinition type, Collection<GenericParameter> parameters)
-        {
-            var genericInstanceType = new GenericInstanceType(type);
-            foreach (var genericParameter in parameters)
-            {
-                genericInstanceType.GenericArguments.Add(genericParameter);
-            }
-            return genericInstanceType;
         }
     }
 }

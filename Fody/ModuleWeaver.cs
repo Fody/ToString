@@ -71,6 +71,7 @@ public class ModuleWeaver
         var format = GetFormatString(type, properties);
 
         var body = method.Body;
+        body.InitLocals = true;
         var ins = body.Instructions;
 
         var hasCollections = properties.Any(x => !x.PropertyType.IsGenericParameter && x.PropertyType.Resolve().IsCollection());
@@ -283,9 +284,13 @@ public class ModuleWeaver
                 this.If(ins, 
                     c =>
                     {
-                        ins.Add(Instruction.Create(OpCodes.Dup));  
+                        ins.Add(Instruction.Create(OpCodes.Dup));
+                        AddBoxing(property, targetType, c);
                     },
-                    t => {},
+                    t => 
+                    {
+                        AddBoxing(property, targetType, t);
+                    },
                     e =>
                     {
                         ins.Add(Instruction.Create(OpCodes.Pop));
@@ -295,6 +300,15 @@ public class ModuleWeaver
         }
 
         ins.Add(Instruction.Create(OpCodes.Stelem_Ref));
+    }
+
+    private static void AddBoxing(PropertyDefinition property, TypeDefinition targetType, Collection<Instruction> ins)
+    {
+        if (property.PropertyType.IsValueType || property.PropertyType.IsGenericParameter)
+        {
+            var genericType = property.PropertyType.GetGenericInstanceType(targetType);
+            ins.Add(Instruction.Create(OpCodes.Box, genericType));
+        }
     }
 
     private void NewStringBuilder(Collection<Instruction> ins)

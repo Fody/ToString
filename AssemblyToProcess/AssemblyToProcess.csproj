@@ -41,11 +41,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="Child.cs" />
+    <Compile Include="Child.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ClassWithIgnoredProperties.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="NullableClass.cs" />
     <Compile Include="EnumClass.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -62,6 +63,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="NormalStruct.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="NullableClass.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ObjectCollection.cs">
