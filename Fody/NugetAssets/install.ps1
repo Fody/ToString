@@ -84,7 +84,7 @@ function UnlockWeaversXml($project)
     }   
 }
 
-UnlockWeaversXml($project)function Set-NugetPackageRefAsDevelopmentDependency($package, $project)
+function Set-NugetPackageRefAsDevelopmentDependency($package, $project)
 {
 	Write-Host "Set-NugetPackageRefAsDevelopmentDependency" 
     $packagesconfigPath = [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($project.FullName), "packages.config")
@@ -93,6 +93,8 @@ UnlockWeaversXml($project)function Set-NugetPackageRefAsDevelopmentDependency($p
 	$packagenode.SetAttribute('developmentDependency','true')
 	$packagesconfig.Save($packagesconfigPath)
 }
+
+UnlockWeaversXml($project)
 
 RemoveForceProjectLevelHack $project
 
