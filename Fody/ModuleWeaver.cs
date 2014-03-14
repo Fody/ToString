@@ -65,7 +65,7 @@ public class ModuleWeaver
         var strType = ModuleDefinition.TypeSystem.String;
         var method = new MethodDefinition("ToString", methodAttributes, strType);
         method.Body.Variables.Add(new VariableDefinition(new ArrayType(ModuleDefinition.TypeSystem.Object)));
-        var allProperties = type.GetProperties();
+        var allProperties = type.GetProperties().Where(x => !x.HasParameters).ToArray();
         var properties = RemoveIgnoredProperties(allProperties);
 
         var format = GetFormatString(type, properties);

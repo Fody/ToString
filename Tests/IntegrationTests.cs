@@ -392,4 +392,17 @@ public class IntegrationTests
 
         Assert.AreEqual( "{T: \"TimeClass\", X: \"1988-05-23T10:30:00.0000000Z\", Y: \"1.02:03:04\"}", result );
     }
+
+    [Test]
+    public void IndexerTest()
+    {
+        var type = assembly.GetType("ClassWithIndexer");
+        dynamic instance = Activator.CreateInstance(type);
+        instance.X = 1;
+        instance.Y = 2;
+
+        var result = instance.ToString();
+
+        Assert.AreEqual("{T: \"ClassWithIndexer\", X: 1, Y: 2}", result);
+    }
 }

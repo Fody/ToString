@@ -47,6 +47,7 @@
     <Compile Include="ClassWithIgnoredProperties.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ClassWithIndexer.cs" />
     <Compile Include="EnumClass.cs">
       <SubType>Code</SubType>
     </Compile>
