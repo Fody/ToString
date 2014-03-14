@@ -74,6 +74,7 @@
     <Compile Include="StringCollection.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="TimeClass.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AssemblyToReference\AssemblyToReference.csproj">

@@ -379,4 +379,17 @@ public class IntegrationTests
 
 
     #endregion
+
+    [Test]
+    public void TimeClassTest()
+    {
+        var type = assembly.GetType( "TimeClass" );
+        dynamic instance = Activator.CreateInstance( type );
+        instance.X = new DateTime(1988, 05, 23, 10, 30, 0, DateTimeKind.Utc);
+        instance.Y = new TimeSpan(1, 2, 3, 4);
+
+        var result = instance.ToString();
+
+        Assert.AreEqual( "{T: \"TimeClass\", X: \"1988-05-23T10:30:00.0000000Z\", Y: \"1.02:03:04\"}", result );
+    }
 }

@@ -98,7 +98,7 @@ public class ModuleWeaver
         for (var i = 0; i < properties.Length; i++)
         {
             var property = properties[i];
-            AddPropertyCode(method.Body, i + genericOffset, property, type);
+            AddPropertyCode(method.Body, i + genericOffset, property, type, method.Body.Variables);
         }
 
         this.AddMethodAttributes(method);
@@ -173,7 +173,7 @@ public class ModuleWeaver
         ins.Add(Instruction.Create(OpCodes.Stloc_0));
     }
 
-    private void AddPropertyCode(MethodBody body, int index, PropertyDefinition property, TypeDefinition targetType)
+    private void AddPropertyCode(MethodBody body, int index, PropertyDefinition property, TypeDefinition targetType, Collection<VariableDefinition> variables)
     {
         var ins = body.Instructions;
 
@@ -188,6 +188,16 @@ public class ModuleWeaver
         if ( get.ReturnType.IsValueType)
         {
             var returnType = ModuleDefinition.Import(property.GetMethod.ReturnType);
+            if( returnType.FullName == "System.DateTime" )
+            {
+                var convertToUtc = ModuleDefinition.Import(returnType.Resolve().FindMethod( "ToUniversalTime" ));
+                
+                var varibale = new VariableDefinition(returnType);
+                variables.Add( varibale );
+                ins.Add(Instruction.Create(OpCodes.Stloc, varibale));
+                ins.Add(Instruction.Create(OpCodes.Ldloca, varibale));
+                ins.Add(Instruction.Create(OpCodes.Call, convertToUtc));
+            }
             ins.Add(Instruction.Create(OpCodes.Box, returnType));
         }
         else
@@ -453,6 +463,10 @@ public class ModuleWeaver
             {
                 sb.Append(":O");
             }
+            if( property.PropertyType.FullName == "System.TimeSpan" )
+            {
+                sb.Append( ":c" );
+            }
 
             sb.Append("}");
 
@@ -474,7 +488,7 @@ public class ModuleWeaver
     private static bool HaveToAddQuotes(TypeReference type)
     {
         var name = type.FullName;
-        if(name == "System.String" || name == "System.Char" || name == "System.DateTime")
+        if(name == "System.String" || name == "System.Char" || name == "System.DateTime" || name == "System.TimeSpan")
         {
             return true;
         }
