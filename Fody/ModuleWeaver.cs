@@ -106,6 +106,12 @@ public class ModuleWeaver
         this.AddEndCode(body);
         body.OptimizeMacros();
 
+        var toRemove = type.Methods.Where(x => x.Name == method.Name && x.Parameters.Count == 0).FirstOrDefault();
+        if (toRemove != null)
+        {
+            type.Methods.Remove(toRemove);
+        }
+
         type.Methods.Add(method);
 
         this.RemoveFodyAttributes(type, allProperties);

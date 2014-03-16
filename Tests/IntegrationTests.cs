@@ -405,4 +405,17 @@ public class IntegrationTests
 
         Assert.AreEqual("{T: \"ClassWithIndexer\", X: 1, Y: 2}", result);
     }
+
+    [Test]
+    public void RemoveToStringMethod()
+    {
+        var type = assembly.GetType("ClassWithToString");
+        dynamic instance = Activator.CreateInstance(type);
+        instance.X = 1;
+        instance.Y = 2;
+
+        var result = instance.ToString();
+
+        Assert.AreEqual("{T: \"ClassWithToString\", X: 1, Y: 2}", result);
+    }
 }
