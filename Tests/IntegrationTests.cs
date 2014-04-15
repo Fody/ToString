@@ -418,4 +418,17 @@ public class IntegrationTests
 
         Assert.AreEqual("{T: \"ClassWithToString\", X: 1, Y: 2}", result);
     }
+
+    [Test]
+    public void GuidClassTest()
+    {
+        var type = assembly.GetType( "GuidClass" );
+        dynamic instance = Activator.CreateInstance( type );
+        instance.X = 1;
+        instance.Y = new Guid(1,2,3,4,5,6,7,8,9,10,11);
+
+        var result = instance.ToString();
+
+        Assert.AreEqual( "{T: \"GuidClass\", X: 1, Y: \"00000001-0002-0003-0405-060708090a0b\"}", result );
+    }
 }

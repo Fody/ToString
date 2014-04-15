@@ -63,6 +63,9 @@
     <Compile Include="NestedClass.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="GuidlClass.cs" >
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="NormalClass.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
 [assembly: AssemblyTitle("Foody.ToString")]
 [assembly: AssemblyProduct("Foody.ToString")]
-[assembly: AssemblyVersion("1.6.2.0")]
-[assembly: AssemblyFileVersion("1.6.2.0")]
+[assembly: AssemblyVersion("1.6.3.0")]
+[assembly: AssemblyFileVersion("1.6.3.0")]

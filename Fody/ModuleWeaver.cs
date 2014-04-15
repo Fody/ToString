@@ -494,7 +494,8 @@ public class ModuleWeaver
     private static bool HaveToAddQuotes(TypeReference type)
     {
         var name = type.FullName;
-        if(name == "System.String" || name == "System.Char" || name == "System.DateTime" || name == "System.TimeSpan")
+        if(name == "System.String" || name == "System.Char" || name == "System.DateTime" || name == "System.TimeSpan"
+            || name == "System.Guid")
         {
             return true;
         }
