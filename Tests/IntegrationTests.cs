@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Reflection;
-using System.Text;
 using Mono.Cecil;
 using NUnit.Framework;
 
@@ -80,17 +78,17 @@ public class IntegrationTests
     public void NestedClassTest()
     {
         var normalType = assembly.GetType("NormalClass");
-        dynamic noramlInstance = Activator.CreateInstance(normalType);
-        noramlInstance.X = 1;
-        noramlInstance.Y = "2";
-        noramlInstance.Z = 4.5;
-        noramlInstance.V = 'V';
+        dynamic normalInstance = Activator.CreateInstance(normalType);
+        normalInstance.X = 1;
+        normalInstance.Y = "2";
+        normalInstance.Z = 4.5;
+        normalInstance.V = 'V';
         var nestedType = assembly.GetType("NestedClass");
         dynamic nestedInstance = Activator.CreateInstance(nestedType);
         nestedInstance.A = 10;
         nestedInstance.B = "11";
         nestedInstance.C = 12.25;
-        nestedInstance.D = noramlInstance;
+        nestedInstance.D = normalInstance;
 
         var result = nestedInstance.ToString();
 
@@ -146,10 +144,10 @@ public class IntegrationTests
         dynamic instance = Activator.CreateInstance(derivedType);
         instance.InChildNumber = 1L;
         instance.InChildText = "2";
-        instance.InChildCollection  = new int[] {3};
+        instance.InChildCollection  = new[] {3};
         instance.InParentNumber = 4L;
         instance.InParentText = "5";
-        instance.InParentCollection  = new int[] {6};
+        instance.InParentCollection  = new[] {6};
 
         var result = instance.ToString();
 
@@ -176,7 +174,7 @@ public class IntegrationTests
     {
         var type = assembly.GetType("IntCollection");
         dynamic nestedInstance = Activator.CreateInstance(type);
-        nestedInstance.Collection = new int[] { 1, 2, 3, 4, 5, 6 };
+        nestedInstance.Collection = new[] { 1, 2, 3, 4, 5, 6 };
         nestedInstance.Count = 2;
 
         var result = nestedInstance.ToString();

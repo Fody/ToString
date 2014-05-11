@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 public enum NormalEnum
 {
@@ -35,8 +32,8 @@ public class EnumClass
 
     public EnumClass(int normalEnum, int flagsEnum)
     {
-        this.NormalEnum = (NormalEnum)normalEnum;
-        this.FlagsEnum = (FlagsEnum)flagsEnum;
+        NormalEnum = (NormalEnum)normalEnum;
+        FlagsEnum = (FlagsEnum)flagsEnum;
     }
 }
 

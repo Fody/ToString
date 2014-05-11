@@ -23,7 +23,7 @@ public class ModuleWeaver
 
     private MethodReference appendString;
     private MethodReference moveNext;
-    private MethodReference currrent;
+    private MethodReference current;
     private MethodReference getEnumerator;
     private MethodReference getInvariantCulture;
     private MethodReference formatMethod;
@@ -38,9 +38,9 @@ public class ModuleWeaver
         stringBuilderType = ModuleDefinition.Import(typeof (StringBuilder));
         appendString = ModuleDefinition.Import(typeof(StringBuilder).GetMethod("Append", new[] { typeof(object) }));
         moveNext = ModuleDefinition.Import(typeof(IEnumerator).GetMethod("MoveNext"));
-        currrent = ModuleDefinition.Import(typeof(IEnumerator).GetProperty("Current").GetGetMethod());
+        current = ModuleDefinition.Import(typeof(IEnumerator).GetProperty("Current").GetGetMethod());
         getEnumerator = ModuleDefinition.Import(typeof(IEnumerable).GetMethod("GetEnumerator"));
-        formatMethod = this.ModuleDefinition.Import(this.ModuleDefinition.TypeSystem.String.Resolve().FindMethod("Format", "IFormatProvider", "String", "Object[]"));
+        formatMethod = ModuleDefinition.Import(ModuleDefinition.TypeSystem.String.Resolve().FindMethod("Format", "IFormatProvider", "String", "Object[]"));
 
         var cultureInfoType = ModuleDefinition.Import(typeof(CultureInfo)).Resolve();
         var invariantCulture = cultureInfoType.Properties.Single(x => x.Name == "InvariantCulture");
@@ -51,7 +51,7 @@ public class ModuleWeaver
             AddToString(type);
         }
 
-        this.RemoveReference();
+        RemoveReference();
     }
 
     private PropertyDefinition[] GetPublicProperties(TypeDefinition type)
@@ -79,7 +79,7 @@ public class ModuleWeaver
         {
             method.Body.Variables.Add(new VariableDefinition(stringBuilderType));
 
-            var enumeratorType = this.ModuleDefinition.Import(typeof (IEnumerator));
+            var enumeratorType = ModuleDefinition.Import(typeof (IEnumerator));
             method.Body.Variables.Add(new VariableDefinition(enumeratorType));
 
             method.Body.Variables.Add(new VariableDefinition(ModuleDefinition.TypeSystem.Boolean));
@@ -88,7 +88,7 @@ public class ModuleWeaver
         }
 
         var genericOffset = !type.HasGenericParameters ? 0 : type.GenericParameters.Count;
-        this.AddInitCode(ins, format, properties, genericOffset);
+        AddInitCode(ins, format, properties, genericOffset);
 
         if (type.HasGenericParameters)
         {
@@ -101,12 +101,12 @@ public class ModuleWeaver
             AddPropertyCode(method.Body, i + genericOffset, property, type, method.Body.Variables);
         }
 
-        this.AddMethodAttributes(method);
+        AddMethodAttributes(method);
 
-        this.AddEndCode(body);
+        AddEndCode(body);
         body.OptimizeMacros();
 
-        var toRemove = type.Methods.Where(x => x.Name == method.Name && x.Parameters.Count == 0).FirstOrDefault();
+        var toRemove = type.Methods.FirstOrDefault(x => x.Name == method.Name && x.Parameters.Count == 0);
         if (toRemove != null)
         {
             type.Methods.Remove(toRemove);
@@ -114,15 +114,15 @@ public class ModuleWeaver
 
         type.Methods.Add(method);
 
-        this.RemoveFodyAttributes(type, allProperties);
+        RemoveFodyAttributes(type, allProperties);
     }
 
     private void AddGenericParameterNames(TypeDefinition type, Collection<Instruction> ins)
     {
         var typeType = ModuleDefinition.Import(typeof(Type)).Resolve();
         var memberInfoType = ModuleDefinition.Import(typeof(System.Reflection.MemberInfo)).Resolve();
-        var getTypeMethod = this.ModuleDefinition.Import(ModuleDefinition.TypeSystem.Object.Resolve().FindMethod("GetType"));
-        var getGenericArgumentsMethod = this.ModuleDefinition.Import(typeType.FindMethod("GetGenericArguments"));
+        var getTypeMethod = ModuleDefinition.Import(ModuleDefinition.TypeSystem.Object.Resolve().FindMethod("GetType"));
+        var getGenericArgumentsMethod = ModuleDefinition.Import(typeType.FindMethod("GetGenericArguments"));
         var nameProperty = memberInfoType.Properties.Where(x => x.Name == "Name").Single();
         var nameGet = ModuleDefinition.Import(nameProperty.GetMethod);
 
@@ -160,8 +160,8 @@ public class ModuleWeaver
 
     private void AddEndCode(MethodBody body)
     {
-        var stringType = this.ModuleDefinition.TypeSystem.String.Resolve();
-        var formatMethod = this.ModuleDefinition.Import(stringType.FindMethod("Format", "IFormatProvider", "String", "Object[]"));
+        var stringType = ModuleDefinition.TypeSystem.String.Resolve();
+        var formatMethod = ModuleDefinition.Import(stringType.FindMethod("Format", "IFormatProvider", "String", "Object[]"));
         body.Instructions.Add(Instruction.Create(OpCodes.Ldloc_0));
         body.Instructions.Add(Instruction.Create(OpCodes.Call, formatMethod));
         body.Instructions.Add(Instruction.Create(OpCodes.Ret));
@@ -175,7 +175,7 @@ public class ModuleWeaver
         ins.Add(Instruction.Create(OpCodes.Call, getInvariantCulture));
         ins.Add(Instruction.Create(OpCodes.Ldstr, format));
         ins.Add(Instruction.Create(OpCodes.Ldc_I4, properties.Length + genericOffset));
-        ins.Add(Instruction.Create(OpCodes.Newarr, this.ModuleDefinition.TypeSystem.Object));
+        ins.Add(Instruction.Create(OpCodes.Newarr, ModuleDefinition.TypeSystem.Object));
         ins.Add(Instruction.Create(OpCodes.Stloc_0));
     }
 
@@ -186,7 +186,7 @@ public class ModuleWeaver
         ins.Add(Instruction.Create(OpCodes.Ldloc_0));
         ins.Add(Instruction.Create(OpCodes.Ldc_I4, index));
 
-        MethodReference get = ModuleDefinition.Import(property.GetGetMethod(targetType));
+        var get = ModuleDefinition.Import(property.GetGetMethod(targetType));
             
         ins.Add(Instruction.Create(OpCodes.Ldarg_0));
         ins.Add(Instruction.Create(OpCodes.Call, get));
@@ -198,10 +198,10 @@ public class ModuleWeaver
             {
                 var convertToUtc = ModuleDefinition.Import(returnType.Resolve().FindMethod( "ToUniversalTime" ));
                 
-                var varibale = new VariableDefinition(returnType);
-                variables.Add( varibale );
-                ins.Add(Instruction.Create(OpCodes.Stloc, varibale));
-                ins.Add(Instruction.Create(OpCodes.Ldloca, varibale));
+                var variable = new VariableDefinition(returnType);
+                variables.Add(variable);
+                ins.Add(Instruction.Create(OpCodes.Stloc, variable));
+                ins.Add(Instruction.Create(OpCodes.Ldloca, variable));
                 ins.Add(Instruction.Create(OpCodes.Call, convertToUtc));
             }
             ins.Add(Instruction.Create(OpCodes.Box, returnType));
@@ -215,20 +215,17 @@ public class ModuleWeaver
             {
                 AssignFalseToFirstFLag(ins);
 
-                this.If(ins, 
-                    nc =>
-                    {
-                        nc.Add(Instruction.Create(OpCodes.Dup));
-                    },
+                If(ins, 
+                    nc => nc.Add(Instruction.Create(OpCodes.Dup)),
                     nt =>
                     {
-                        this.GetEnumerator(nt);
+                        GetEnumerator(nt);
 
-                        this.NewStringBuilder(nt);
+                        NewStringBuilder(nt);
 
-                        this.AppendString(nt, "[");
+                        AppendString(nt, "[");
 
-                        this.While(nt,
+                        While(nt,
                             c =>
                             {
                                 c.Add(Instruction.Create(OpCodes.Ldloc_2));
@@ -239,11 +236,11 @@ public class ModuleWeaver
                                 AppendSeparator(b, appendString);
 
                                 ins.Add(Instruction.Create(OpCodes.Ldloc_1));
-                                this.If(ins,
+                                If(ins,
                                     c =>
                                     {
                                         c.Add(Instruction.Create(OpCodes.Ldloc_2));
-                                        c.Add(Instruction.Create(OpCodes.Callvirt, currrent));
+                                        c.Add(Instruction.Create(OpCodes.Callvirt, current));
                                     },
                                     t =>
                                     {
@@ -263,14 +260,14 @@ public class ModuleWeaver
                                         t.Add(Instruction.Create(OpCodes.Ldstr, format));  
 
                                         t.Add(Instruction.Create(OpCodes.Ldc_I4, 1));
-                                        t.Add(Instruction.Create(OpCodes.Newarr, this.ModuleDefinition.TypeSystem.Object)); 
+                                        t.Add(Instruction.Create(OpCodes.Newarr, ModuleDefinition.TypeSystem.Object)); 
                                         t.Add(Instruction.Create(OpCodes.Stloc, body.Variables[4])); 
                                         t.Add(Instruction.Create(OpCodes.Ldloc, body.Variables[4])); 
 
                                         t.Add(Instruction.Create(OpCodes.Ldc_I4_0)); 
 
                                         t.Add(Instruction.Create(OpCodes.Ldloc_2)); 
-                                        t.Add(Instruction.Create(OpCodes.Callvirt, currrent)); 
+                                        t.Add(Instruction.Create(OpCodes.Callvirt, current)); 
 
 
                                         t.Add(Instruction.Create(OpCodes.Stelem_Ref));
@@ -278,16 +275,13 @@ public class ModuleWeaver
 
                                         t.Add(Instruction.Create(OpCodes.Call, formatMethod)); 
                                     },
-                                    e =>
-                                    {
-                                        e.Add(Instruction.Create(OpCodes.Ldstr, "null"));
-                                    });
+                                    e => e.Add(Instruction.Create(OpCodes.Ldstr, "null")));
                                 ins.Add(Instruction.Create(OpCodes.Callvirt, appendString));
                                 ins.Add(Instruction.Create(OpCodes.Pop));
                             });
 
-                        this.AppendString(ins, "]");
-                        this.StringBuilderToString(ins);       
+                        AppendString(ins, "]");
+                        StringBuilderToString(ins);       
                     },
                     nf =>
                     {
@@ -297,16 +291,13 @@ public class ModuleWeaver
             }
             else
             {
-                this.If(ins, 
+                If(ins, 
                     c =>
                     {
                         ins.Add(Instruction.Create(OpCodes.Dup));
                         AddBoxing(property, targetType, c);
                     },
-                    t => 
-                    {
-                        AddBoxing(property, targetType, t);
-                    },
+                    t => AddBoxing(property, targetType, t),
                     e =>
                     {
                         ins.Add(Instruction.Create(OpCodes.Pop));
@@ -329,14 +320,14 @@ public class ModuleWeaver
 
     private void NewStringBuilder(Collection<Instruction> ins)
     {
-        var stringBuilderConstructor = this.ModuleDefinition.Import(typeof (StringBuilder).GetConstructor(new Type[] {}));
+        var stringBuilderConstructor = ModuleDefinition.Import(typeof (StringBuilder).GetConstructor(new Type[] {}));
         ins.Add(Instruction.Create(OpCodes.Newobj, stringBuilderConstructor));
         ins.Add(Instruction.Create(OpCodes.Stloc_1));
     }
 
     private void GetEnumerator(Collection<Instruction> ins)
     {
-        ins.Add(Instruction.Create(OpCodes.Callvirt, this.getEnumerator));
+        ins.Add(Instruction.Create(OpCodes.Callvirt, getEnumerator));
         ins.Add(Instruction.Create(OpCodes.Stloc_2));
     }
 
@@ -377,14 +368,14 @@ public class ModuleWeaver
     private void StringBuilderToString(Collection<Instruction> ins)
     {
         ins.Add(Instruction.Create(OpCodes.Ldloc_1));
-        var toStringMethod = this.ModuleDefinition.Import(stringBuilderType.Resolve().FindMethod("ToString"));
+        var toStringMethod = ModuleDefinition.Import(stringBuilderType.Resolve().FindMethod("ToString"));
         ins.Add(Instruction.Create(OpCodes.Callvirt, toStringMethod));
     }
 
     private void If(Collection<Instruction> ins,
                     Action<Collection<Instruction>> condition,
-                    Action<Collection<Instruction>> thenStatment,
-                    Action<Collection<Instruction>> elseStetment)
+                    Action<Collection<Instruction>> thenStatement,
+                    Action<Collection<Instruction>> elseStatement)
     {
         var ifEnd = Instruction.Create(OpCodes.Nop);
         var ifElse = Instruction.Create(OpCodes.Nop);
@@ -393,12 +384,12 @@ public class ModuleWeaver
 
         ins.Add(Instruction.Create(OpCodes.Brfalse, ifElse));
 
-        thenStatment(ins);
+        thenStatement(ins);
 
         ins.Add(Instruction.Create(OpCodes.Br, ifEnd));
         ins.Add(ifElse);
 
-        elseStetment(ins);
+        elseStatement(ins);
 
         ins.Add(ifEnd);
     }
@@ -406,14 +397,8 @@ public class ModuleWeaver
     private void AppendSeparator(Collection<Instruction> ins, MethodReference appendString)
     {
         If(ins,
-           c =>
-               {
-                   c.Add(Instruction.Create(OpCodes.Ldloc_3));
-               },
-           t =>
-               {
-                   AppendString(t, ", ");
-               },
+           c => c.Add(Instruction.Create(OpCodes.Ldloc_3)),
+           t => AppendString(t, ", "),
            e =>
                {
                    ins.Add(Instruction.Create(OpCodes.Ldc_I4_1));
@@ -425,7 +410,7 @@ public class ModuleWeaver
     {
         var sb = new StringBuilder();
         sb.Append("{{T: \"");
-        int offset = 0;
+        var offset = 0;
         if (!type.HasGenericParameters)
         {
             sb.Append(type.Name);

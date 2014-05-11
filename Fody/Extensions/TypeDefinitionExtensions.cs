@@ -23,8 +23,8 @@ public static class TypeDefinitionExtensions
         var currentType = type;
         do
         {
-            var currentPoperties = currentType.Properties;
-            properties.AddRange(currentPoperties);
+            var currentProperties = currentType.Properties;
+            properties.AddRange(currentProperties);
             currentType = currentType.BaseType.Resolve();
         } while (currentType.FullName != typeof(object).FullName);
 
@@ -69,8 +69,8 @@ public static class TypeDefinitionExtensions
         if (type.HasGenericParameters)
         {
             GenericInstanceType genericInstanceType;
-            TypeReference parent = targetType;
-            TypeReference parentReference = targetType;
+            var parent = targetType;
+            var parentReference = targetType;
 
             if (type.FullName == targetType.Resolve().FullName)
             {

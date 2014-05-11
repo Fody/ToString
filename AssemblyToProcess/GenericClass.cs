@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Globalization;
-using System;
 
 [ToString]
 public class WithGenericParameter<T> : GenericClass<T> where T : GenericClassBaseClass
