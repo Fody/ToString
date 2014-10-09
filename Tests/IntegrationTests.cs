@@ -167,6 +167,19 @@ public class IntegrationTests
         Assert.That(result, Is.EqualTo("{T: \"GenericChild\", InChild: \"5\", GenericInParent: 6}"));
     }
 
+    [Test]
+    public void GuidErrorTest()
+    {
+        var type = assembly.GetType( "ReferenceObject" );
+        dynamic instance = Activator.CreateInstance( type );
+        instance.Id = Guid.Parse( "{f6ab1abe-5811-40e9-8154-35776d2e5106}" );
+        instance.Name = "Test";
+
+        var result = instance.ToString();
+
+        Assert.AreEqual( "{T: \"ReferenceObject\", Name: \"Test\", Id: \"f6ab1abe-5811-40e9-8154-35776d2e5106\"}", result );
+    }
+
     #region Collections
 
     [Test]

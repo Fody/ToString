@@ -63,6 +63,7 @@
     <Compile Include="GenericClass.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="GuidError.cs" />
     <Compile Include="IntCollection.cs">
       <SubType>Code</SubType>
     </Compile>
