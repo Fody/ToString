@@ -6,13 +6,10 @@ Generates ToString method from public properties for class decorated with a `[To
 
 [Introduction to Fody](http://github.com/Fody/Fody/wiki/SampleUsage).
 
+## The nuget package  [![NuGet Status](http://img.shields.io/nuget/v/ToString.Fody.svg?style=flat)](https://www.nuget.org/packages/ToString.Fody/)
 
-## Nuget 
+https://nuget.org/packages/ToString.Fody/
 
-Nuget package http://nuget.org/packages/ToString.Fody/
-
-To Install from the Nuget Package Manager Console 
-    
     PM> Install-Package ToString.Fody
     
 ## Your Code
