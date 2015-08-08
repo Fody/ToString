@@ -1,7 +1,4 @@
-﻿using System;
-
-
-[ToString]
+﻿[ToString]
 public class ReferenceObject : NameObject
 {
 }
