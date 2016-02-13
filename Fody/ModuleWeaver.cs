@@ -19,14 +19,14 @@ public class ModuleWeaver
     public IAssemblyResolver AssemblyResolver { get; set; }
     public XElement Config { get; set; }
 
-    private TypeReference stringBuilderType;
+    TypeReference stringBuilderType;
 
-    private MethodReference appendString;
-    private MethodReference moveNext;
-    private MethodReference current;
-    private MethodReference getEnumerator;
-    private MethodReference getInvariantCulture;
-    private MethodReference formatMethod;
+    MethodReference appendString;
+    MethodReference moveNext;
+    MethodReference current;
+    MethodReference getEnumerator;
+    MethodReference getInvariantCulture;
+    MethodReference formatMethod;
 
     public IEnumerable<TypeDefinition> GetMachingTypes()
     {
@@ -54,12 +54,12 @@ public class ModuleWeaver
         RemoveReference();
     }
 
-    private PropertyDefinition[] GetPublicProperties(TypeDefinition type)
+    PropertyDefinition[] GetPublicProperties(TypeDefinition type)
     {
         return type.Properties.Where(x => x.GetMethod != null).ToArray();
     }
 
-    private void AddToString(TypeDefinition type)
+    void AddToString(TypeDefinition type)
     {
         var methodAttributes = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual;
         var strType = ModuleDefinition.TypeSystem.String;
@@ -117,7 +117,7 @@ public class ModuleWeaver
         RemoveFodyAttributes(type, allProperties);
     }
 
-    private void AddGenericParameterNames(TypeDefinition type, Collection<Instruction> ins)
+    void AddGenericParameterNames(TypeDefinition type, Collection<Instruction> ins)
     {
         var typeType = ModuleDefinition.Import(typeof(Type)).Resolve();
         var memberInfoType = ModuleDefinition.Import(typeof(System.Reflection.MemberInfo)).Resolve();
@@ -142,7 +142,7 @@ public class ModuleWeaver
         }
     }
 
-    private void AddMethodAttributes(MethodDefinition method)
+    void AddMethodAttributes(MethodDefinition method)
     {
         var generatedConstructor = ModuleDefinition.Import(typeof(GeneratedCodeAttribute).GetConstructor(new[] { typeof(string), typeof(string) }));
 
@@ -158,7 +158,7 @@ public class ModuleWeaver
         method.CustomAttributes.Add(debuggerAttribute);
     }
 
-    private void AddEndCode(MethodBody body)
+    void AddEndCode(MethodBody body)
     {
         var stringType = ModuleDefinition.TypeSystem.String.Resolve();
         var formatMethod = ModuleDefinition.Import(stringType.FindMethod("Format", "IFormatProvider", "String", "Object[]"));
@@ -167,7 +167,7 @@ public class ModuleWeaver
         body.Instructions.Add(Instruction.Create(OpCodes.Ret));
     }
 
-    private void AddInitCode(Collection<Instruction> ins, string format, PropertyDefinition[] properties, int genericOffset)
+    void AddInitCode(Collection<Instruction> ins, string format, PropertyDefinition[] properties, int genericOffset)
     {
         var cultureInfoType = ModuleDefinition.Import(typeof(CultureInfo)).Resolve();
         var invariantCulture = cultureInfoType.Properties.Single(x => x.Name == "InvariantCulture");
@@ -179,7 +179,7 @@ public class ModuleWeaver
         ins.Add(Instruction.Create(OpCodes.Stloc_0));
     }
 
-    private void AddPropertyCode(MethodBody body, int index, PropertyDefinition property, TypeDefinition targetType, Collection<VariableDefinition> variables)
+    void AddPropertyCode(MethodBody body, int index, PropertyDefinition property, TypeDefinition targetType, Collection<VariableDefinition> variables)
     {
         var ins = body.Instructions;
 
@@ -233,7 +233,7 @@ public class ModuleWeaver
                             },
                             b =>
                             {
-                                AppendSeparator(b, appendString);
+                                AppendSeparator(b);
 
                                 ins.Add(Instruction.Create(OpCodes.Ldloc_1));
                                 If(ins,
@@ -309,7 +309,7 @@ public class ModuleWeaver
         ins.Add(Instruction.Create(OpCodes.Stelem_Ref));
     }
 
-    private static void AddBoxing(PropertyDefinition property, TypeDefinition targetType, Collection<Instruction> ins)
+    static void AddBoxing(PropertyDefinition property, TypeDefinition targetType, Collection<Instruction> ins)
     {
         if (property.PropertyType.IsValueType || property.PropertyType.IsGenericParameter)
         {
@@ -318,26 +318,26 @@ public class ModuleWeaver
         }
     }
 
-    private void NewStringBuilder(Collection<Instruction> ins)
+    void NewStringBuilder(Collection<Instruction> ins)
     {
         var stringBuilderConstructor = ModuleDefinition.Import(typeof (StringBuilder).GetConstructor(new Type[] {}));
         ins.Add(Instruction.Create(OpCodes.Newobj, stringBuilderConstructor));
         ins.Add(Instruction.Create(OpCodes.Stloc_1));
     }
 
-    private void GetEnumerator(Collection<Instruction> ins)
+    void GetEnumerator(Collection<Instruction> ins)
     {
         ins.Add(Instruction.Create(OpCodes.Callvirt, getEnumerator));
         ins.Add(Instruction.Create(OpCodes.Stloc_2));
     }
 
-    private static void AssignFalseToFirstFLag(Collection<Instruction> ins)
+    static void AssignFalseToFirstFLag(Collection<Instruction> ins)
     {
         ins.Add(Instruction.Create(OpCodes.Ldc_I4_0));
         ins.Add(Instruction.Create(OpCodes.Stloc_3));
     }
 
-    private void While(
+    void While(
         Collection<Instruction> ins,
         Action<Collection<Instruction>> condition,
         Action<Collection<Instruction>> body )
@@ -357,7 +357,7 @@ public class ModuleWeaver
         ins.Add(loopEnd);
     }
 
-    private void AppendString(Collection<Instruction> ins, string str)
+    void AppendString(Collection<Instruction> ins, string str)
     {
         ins.Add(Instruction.Create(OpCodes.Ldloc_1));
         ins.Add(Instruction.Create(OpCodes.Ldstr, str));
@@ -365,14 +365,14 @@ public class ModuleWeaver
         ins.Add(Instruction.Create(OpCodes.Pop));
     }
 
-    private void StringBuilderToString(Collection<Instruction> ins)
+    void StringBuilderToString(Collection<Instruction> ins)
     {
         ins.Add(Instruction.Create(OpCodes.Ldloc_1));
         var toStringMethod = ModuleDefinition.Import(stringBuilderType.Resolve().FindMethod("ToString"));
         ins.Add(Instruction.Create(OpCodes.Callvirt, toStringMethod));
     }
 
-    private void If(Collection<Instruction> ins,
+    void If(Collection<Instruction> ins,
                     Action<Collection<Instruction>> condition,
                     Action<Collection<Instruction>> thenStatement,
                     Action<Collection<Instruction>> elseStatement)
@@ -394,7 +394,7 @@ public class ModuleWeaver
         ins.Add(ifEnd);
     }
 
-    private void AppendSeparator(Collection<Instruction> ins, MethodReference appendString)
+    void AppendSeparator(Collection<Instruction> ins)
     {
         If(ins,
            c => c.Add(Instruction.Create(OpCodes.Ldloc_3)),
@@ -406,7 +406,7 @@ public class ModuleWeaver
                });
     }
 
-    private string GetFormatString(TypeDefinition type, PropertyDefinition[] properties)
+    string GetFormatString(TypeDefinition type, PropertyDefinition[] properties)
     {
         var sb = new StringBuilder();
         sb.Append("{{T: \"");
@@ -476,7 +476,7 @@ public class ModuleWeaver
         return format;
     }
 
-    private static bool HaveToAddQuotes(TypeReference type)
+    static bool HaveToAddQuotes(TypeReference type)
     {
         var name = type.FullName;
         if(name == "System.String" || name == "System.Char" || name == "System.DateTime" || name == "System.TimeSpan"
@@ -489,7 +489,7 @@ public class ModuleWeaver
         return  resolved != null && resolved.IsEnum;
     }
 
-    private void RemoveReference()
+    void RemoveReference()
     {
         var referenceToRemove = ModuleDefinition.AssemblyReferences.FirstOrDefault(x => x.Name == "ToString");
         if (referenceToRemove != null)
@@ -498,7 +498,7 @@ public class ModuleWeaver
         }
     }
 
-    private void RemoveFodyAttributes(TypeDefinition type, PropertyDefinition[] allProperties)
+    void RemoveFodyAttributes(TypeDefinition type, PropertyDefinition[] allProperties)
     {
         type.RemoveAttribute("ToStringAttribute");
         foreach (var property in allProperties)
@@ -507,7 +507,7 @@ public class ModuleWeaver
         }
     }
 
-    private PropertyDefinition[] RemoveIgnoredProperties(PropertyDefinition[] allProperties)
+    PropertyDefinition[] RemoveIgnoredProperties(PropertyDefinition[] allProperties)
     {
         return allProperties.Where(x => x.CustomAttributes.All(y => y.AttributeType.Name != "IgnoreDuringToStringAttribute")).ToArray();
     }

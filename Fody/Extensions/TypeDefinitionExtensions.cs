@@ -100,7 +100,7 @@ public static class TypeDefinitionExtensions
         return type;
     }
 
-    private static GenericInstanceType GetGenericInstanceType(TypeReference type, Collection<GenericParameter> parameters)
+    static GenericInstanceType GetGenericInstanceType(TypeReference type, Collection<GenericParameter> parameters)
     {
         var genericInstanceType = new GenericInstanceType(type);
         foreach (var genericParameter in parameters)
