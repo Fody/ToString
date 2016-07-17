@@ -10,13 +10,12 @@ using NUnit.Framework;
 public class IntegrationTests
 {
     Assembly assembly;
-    List<string> warnings = new List<string>();
     string beforeAssemblyPath;
     string afterAssemblyPath;
 
     public IntegrationTests()
     {
-        beforeAssemblyPath = Path.GetFullPath(@"..\..\..\AssemblyToProcess\bin\Debug\AssemblyToProcess.dll");
+        beforeAssemblyPath = Path.GetFullPath(Path.Combine(TestContext.CurrentContext.TestDirectory, @"..\..\..\AssemblyToProcess\bin\Debug\AssemblyToProcess.dll"));
 #if (!DEBUG)
 
         beforeAssemblyPath = beforeAssemblyPath.Replace("Debug", "Release");
@@ -24,7 +23,7 @@ public class IntegrationTests
 
         afterAssemblyPath = beforeAssemblyPath.Replace(".dll", "2.dll");
         File.Copy(beforeAssemblyPath, afterAssemblyPath, true);
-        
+
         var assemblyResolver = new MockAssemblyResolver
             {
                 Directory = Path.GetDirectoryName(beforeAssemblyPath)
@@ -161,7 +160,7 @@ public class IntegrationTests
         dynamic instance = Activator.CreateInstance(derivedType);
         instance.InChild = "5";
         instance.GenericInParent = 6;
-            
+
         var result = instance.ToString();
 
         Assert.That(result, Is.EqualTo("{T: \"GenericChild\", InChild: \"5\", GenericInParent: 6}"));
