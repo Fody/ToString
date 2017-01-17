@@ -1,47 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
-using Mono.Cecil;
 using NUnit.Framework;
-
 
 [TestFixture]
 public class IntegrationTests
 {
     Assembly assembly;
-    string beforeAssemblyPath;
-    string afterAssemblyPath;
 
     public IntegrationTests()
     {
-        beforeAssemblyPath = Path.GetFullPath(Path.Combine(TestContext.CurrentContext.TestDirectory, @"..\..\..\AssemblyToProcess\bin\Debug\AssemblyToProcess.dll"));
-#if (!DEBUG)
+        var testSetup = TestHelper.PrepareDll("integration");
 
-        beforeAssemblyPath = beforeAssemblyPath.Replace("Debug", "Release");
-#endif
-
-        afterAssemblyPath = beforeAssemblyPath.Replace(".dll", "2.dll");
-        File.Copy(beforeAssemblyPath, afterAssemblyPath, true);
-
-        var assemblyResolver = new MockAssemblyResolver
-            {
-                Directory = Path.GetDirectoryName(beforeAssemblyPath)
-            };
-        var moduleDefinition = ModuleDefinition.ReadModule(afterAssemblyPath,new ReaderParameters
-            {
-                AssemblyResolver = assemblyResolver
-            });
         var weavingTask = new ModuleWeaver
-                              {
-                                  ModuleDefinition = moduleDefinition,
-                                  AssemblyResolver = assemblyResolver,
-                              };
+        {
+            ModuleDefinition = testSetup.ModuleDefinition,
+            AssemblyResolver = testSetup.MockAssemblyResolver
+        };
 
         weavingTask.Execute();
-        moduleDefinition.Write(afterAssemblyPath);
+        testSetup.ModuleDefinition.Write(testSetup.AfterAssemblyPath);
 
-        assembly = Assembly.LoadFile(afterAssemblyPath);
+        assembly = Assembly.LoadFile(testSetup.AfterAssemblyPath);
     }
 
     [Test]
@@ -54,7 +34,7 @@ public class IntegrationTests
         instance.Z = 4.5;
         instance.V = 'C';
 
-        var result  = instance.ToString();
+        var result = instance.ToString();
 
         Assert.AreEqual("{T: \"NormalClass\", X: 1, Y: \"2\", Z: 4.5, V: \"C\"}", result);
     }
@@ -143,10 +123,10 @@ public class IntegrationTests
         dynamic instance = Activator.CreateInstance(derivedType);
         instance.InChildNumber = 1L;
         instance.InChildText = "2";
-        instance.InChildCollection  = new[] {3};
+        instance.InChildCollection = new[] { 3 };
         instance.InParentNumber = 4L;
         instance.InParentText = "5";
-        instance.InParentCollection  = new[] {6};
+        instance.InParentCollection = new[] { 6 };
 
         var result = instance.ToString();
 
@@ -169,14 +149,14 @@ public class IntegrationTests
     [Test]
     public void GuidErrorTest()
     {
-        var type = assembly.GetType( "ReferenceObject" );
-        dynamic instance = Activator.CreateInstance( type );
-        instance.Id = Guid.Parse( "{f6ab1abe-5811-40e9-8154-35776d2e5106}" );
+        var type = assembly.GetType("ReferenceObject");
+        dynamic instance = Activator.CreateInstance(type);
+        instance.Id = Guid.Parse("{f6ab1abe-5811-40e9-8154-35776d2e5106}");
         instance.Name = "Test";
 
         var result = instance.ToString();
 
-        Assert.AreEqual( "{T: \"ReferenceObject\", Name: \"Test\", Id: \"f6ab1abe-5811-40e9-8154-35776d2e5106\"}", result );
+        Assert.AreEqual("{T: \"ReferenceObject\", Name: \"Test\", Id: \"f6ab1abe-5811-40e9-8154-35776d2e5106\"}", result);
     }
 
     #region Collections
@@ -212,7 +192,7 @@ public class IntegrationTests
     {
         var type = assembly.GetType("IntCollection");
         dynamic nestedInstance = Activator.CreateInstance(type);
-        nestedInstance.Collection = new int[] {};
+        nestedInstance.Collection = new int[] { };
         nestedInstance.Count = 0;
 
         var result = nestedInstance.ToString();
@@ -380,7 +360,7 @@ public class IntegrationTests
     public void EnumWithValues()
     {
         var type = assembly.GetType("EnumClass");
-        dynamic instance = Activator.CreateInstance(type,new object[]{3,6});
+        dynamic instance = Activator.CreateInstance(type, new object[] { 3, 6 });
 
         var result = instance.ToString();
 
@@ -393,14 +373,14 @@ public class IntegrationTests
     [Test]
     public void TimeClassTest()
     {
-        var type = assembly.GetType( "TimeClass" );
-        dynamic instance = Activator.CreateInstance( type );
+        var type = assembly.GetType("TimeClass");
+        dynamic instance = Activator.CreateInstance(type);
         instance.X = new DateTime(1988, 05, 23, 10, 30, 0, DateTimeKind.Utc);
         instance.Y = new TimeSpan(1, 2, 3, 4);
 
         var result = instance.ToString();
 
-        Assert.AreEqual( "{T: \"TimeClass\", X: \"1988-05-23T10:30:00.0000000Z\", Y: \"1.02:03:04\"}", result );
+        Assert.AreEqual("{T: \"TimeClass\", X: \"1988-05-23T10:30:00.0000000Z\", Y: \"1.02:03:04\"}", result);
     }
 
     [Test]
@@ -432,13 +412,13 @@ public class IntegrationTests
     [Test]
     public void GuidClassTest()
     {
-        var type = assembly.GetType( "GuidClass" );
-        dynamic instance = Activator.CreateInstance( type );
+        var type = assembly.GetType("GuidClass");
+        dynamic instance = Activator.CreateInstance(type);
         instance.X = 1;
-        instance.Y = new Guid(1,2,3,4,5,6,7,8,9,10,11);
+        instance.Y = new Guid(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
 
         var result = instance.ToString();
 
-        Assert.AreEqual( "{T: \"GuidClass\", X: 1, Y: \"00000001-0002-0003-0405-060708090a0b\"}", result );
+        Assert.AreEqual("{T: \"GuidClass\", X: 1, Y: \"00000001-0002-0003-0405-060708090a0b\"}", result);
     }
 }

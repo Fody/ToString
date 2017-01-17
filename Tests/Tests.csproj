@@ -64,8 +64,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AttributesTests.cs" />
     <Compile Include="MockAssemblyResolver.cs" />
     <Compile Include="IntegrationTests.cs" />
+    <Compile Include="TestHelper.cs" />
+    <Compile Include="TestSetupDefinition.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AssemblyToReference\AssemblyToReference.csproj">
