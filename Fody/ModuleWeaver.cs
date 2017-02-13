@@ -219,7 +219,7 @@ public class ModuleWeaver
 
                         NewStringBuilder(nt);
 
-                        AppendString(nt, "[");
+                        AppendString(nt, ListStart);
 
                         While(nt,
                             c =>
@@ -276,7 +276,7 @@ public class ModuleWeaver
                                 ins.Add(Instruction.Create(OpCodes.Pop));
                             });
 
-                        AppendString(ins, "]");
+                        AppendString(ins, ListEnd);
                         StringBuilderToString(ins);
                     },
                     nf =>
@@ -525,6 +525,10 @@ public class ModuleWeaver
     private string PropertyNameToValueSeparator => ReadStringValueFromConfig("PropertyNameToValueSeparator", ": ");
 
     private string PropertiesSeparator => ReadStringValueFromConfig("PropertiesSeparator", ", ");
+
+    private string ListStart => ReadStringValueFromConfig("ListStart", "[");
+
+    private string ListEnd => ReadStringValueFromConfig("ListEnd", "]");
 
     private bool WrapWithBrackets => ReadBoolValueFromConfig("WrapWithBrackets", true);
 

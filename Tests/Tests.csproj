@@ -64,6 +64,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AttributesConfiguration.cs" />
     <Compile Include="AttributesTests.cs" />
     <Compile Include="MockAssemblyResolver.cs" />
     <Compile Include="IntegrationTests.cs" />
