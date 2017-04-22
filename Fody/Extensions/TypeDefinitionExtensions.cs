@@ -13,7 +13,7 @@ public static class TypeDefinitionExtensions
 
     public static bool IsCollection(this TypeDefinition type)
     {
-        return !type.Name.Equals("String") && (type.Interfaces.Any(i => i.Name.Equals("IEnumerable")));
+        return !type.Name.Equals("String") && type.Interfaces.Any(i => i.InterfaceType.Name.Equals("IEnumerable"));
     }
 
     public static PropertyDefinition[] GetProperties(this TypeDefinition type)
