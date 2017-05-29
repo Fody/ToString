@@ -6,6 +6,8 @@ Generates ToString method from public properties for class decorated with a `[To
 
 [Introduction to Fody](http://github.com/Fody/Fody/wiki/SampleUsage).
 
+[![NuGet Status](https://img.shields.io/gitter/room/fody/fody.svg?style=flat)](https://gitter.im/Fody/Fody)
+
 ## The nuget package  [![NuGet Status](http://img.shields.io/nuget/v/ToString.Fody.svg?style=flat)](https://www.nuget.org/packages/ToString.Fody/)
 
 https://nuget.org/packages/ToString.Fody/
