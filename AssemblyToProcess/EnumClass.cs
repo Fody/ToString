@@ -36,4 +36,3 @@ public class EnumClass
         FlagsEnum = (FlagsEnum)flagsEnum;
     }
 }
-

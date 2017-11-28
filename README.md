@@ -4,18 +4,40 @@
 
 ## This is an add-in for [Fody](https://github.com/Fody/Fody/) 
 
-![Icon](https://raw.github.com/Fody/ToString/master/Icons/package_icon.png)
+![Icon](https://raw.github.com/Fody/ToString/master/package_icon.png)
 
 Generates ToString method from public properties for class decorated with a `[ToString]` Attribute.
 
 [Introduction to Fody](http://github.com/Fody/Fody/wiki/SampleUsage).
 
 
-## The nuget package
+## Usage
 
-https://nuget.org/packages/ToString.Fody/
+See also [Fody usage](https://github.com/Fody/Fody#usage).
 
-    PM> Install-Package ToString.Fody
+
+### NuGet installation
+
+Install the [ToString.Fody NuGet package](https://nuget.org/packages/ToString.Fody/) and update the [Fody NuGet package](https://nuget.org/packages/Fody/):
+
+```
+PM> Install-Package ToString.Fody
+PM> Update-Package Fody
+```
+
+The `Update-Package Fody` is required since NuGet always defaults to the oldest, and most buggy, version of any dependency.
+
+
+### Add to FodyWeavers.xml
+
+Add `<ToString/>` to [FodyWeavers.xml](https://github.com/Fody/Fody#add-fodyweaversxml)
+
+```xml
+<?xml version="1.0" encoding="utf-8" ?>
+<Weavers>
+  <ToString/>
+</Weavers>
+```
 
 
 ## Your Code

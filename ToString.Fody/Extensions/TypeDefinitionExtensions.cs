@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-
 using Mono.Cecil;
 using Mono.Collections.Generic;
 
@@ -32,9 +31,7 @@ public static class TypeDefinitionExtensions
     }
 
     public static TypeReference GetGenericInstanceType(this TypeReference type, TypeReference targetType)
-    {
-        var genericInstance = targetType as GenericInstanceType;
-        if (genericInstance != null)
+    {        if (targetType is GenericInstanceType genericInstance)
         {
             return genericInstance;
         }
@@ -46,18 +43,7 @@ public static class TypeDefinitionExtensions
             var current = targetType;
             var currentResolved = current.Resolve();
 
-            while (currentResolved.FullName != genericParameter.DeclaringType.FullName)
-            {
-                if (currentResolved.BaseType == null)
-                {
-                    return type;
-                }
-                current = currentResolved.BaseType;
-                currentResolved = current.Resolve();
-            }
-
-            var genericInstanceType = current as GenericInstanceType;
-            if (genericInstanceType != null)
+            while (currentResolved.FullName != genericParameter.DeclaringType.FullName)            {                if (currentResolved.BaseType == null)                {                    return type;                }                current = currentResolved.BaseType;                currentResolved = current.Resolve();            }            if (current is GenericInstanceType genericInstanceType)
             {
                 var newType = genericInstanceType.GenericArguments[genericParameter.Position];
                 return newType;

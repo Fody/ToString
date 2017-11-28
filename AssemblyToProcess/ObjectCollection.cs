@@ -7,4 +7,3 @@ public class ObjectCollection
 
     public IEnumerable<NormalClass> Collection { get; set; }
 }
-
