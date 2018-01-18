@@ -7,15 +7,13 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
 using Mono.Collections.Generic;
-using System.Globalization;
 using System.CodeDom.Compiler;
 using System.Diagnostics;
 using Fody;
 
-public class ModuleWeaver: BaseModuleWeaver
+public class ModuleWeaver : BaseModuleWeaver
 {
     TypeReference stringBuilderType;
-
     MethodReference appendString;
     MethodReference moveNext;
     MethodReference current;
@@ -43,7 +41,7 @@ public class ModuleWeaver: BaseModuleWeaver
         appendString = ModuleDefinition.ImportReference(stringBuildType.FindMethod("Append", "Object"));
         var enumeratorType = FindType("System.Collections.IEnumerator");
         moveNext = ModuleDefinition.ImportReference(enumeratorType.FindMethod("MoveNext"));
-        current = ModuleDefinition.ImportReference(enumeratorType.Properties.Single(x=>x.Name=="Current").GetMethod);
+        current = ModuleDefinition.ImportReference(enumeratorType.Properties.Single(x => x.Name == "Current").GetMethod);
         var enumerableType = FindType("System.Collections.IEnumerable");
         getEnumerator = ModuleDefinition.ImportReference(enumerableType.FindMethod("GetEnumerator"));
         var stringType = FindType("System.String");
@@ -79,7 +77,7 @@ public class ModuleWeaver: BaseModuleWeaver
         {
             method.Body.Variables.Add(new VariableDefinition(stringBuilderType));
 
-            var enumeratorType = ModuleDefinition.ImportReference(typeof (IEnumerator));
+            var enumeratorType = ModuleDefinition.ImportReference(typeof(IEnumerator));
             method.Body.Variables.Add(new VariableDefinition(enumeratorType));
 
             method.Body.Variables.Add(new VariableDefinition(ModuleDefinition.TypeSystem.Boolean));
@@ -144,7 +142,11 @@ public class ModuleWeaver: BaseModuleWeaver
 
     void AddMethodAttributes(MethodDefinition method)
     {
-        var generatedConstructor = ModuleDefinition.ImportReference(typeof(GeneratedCodeAttribute).GetConstructor(new[] { typeof(string), typeof(string) }));
+        var generatedConstructor = ModuleDefinition.ImportReference(typeof(GeneratedCodeAttribute).GetConstructor(new[]
+        {
+            typeof(string),
+            typeof(string)
+        }));
 
         var version = typeof(ModuleWeaver).Assembly.GetName().Version.ToString();
 
@@ -160,8 +162,6 @@ public class ModuleWeaver: BaseModuleWeaver
 
     void AddEndCode(MethodBody body)
     {
-        var stringType = ModuleDefinition.TypeSystem.String.Resolve();
-        var formatMethod = ModuleDefinition.ImportReference(stringType.FindMethod("Format", "IFormatProvider", "String", "Object[]"));
         body.Instructions.Add(Instruction.Create(OpCodes.Ldloc_0));
         body.Instructions.Add(Instruction.Create(OpCodes.Call, formatMethod));
         body.Instructions.Add(Instruction.Create(OpCodes.Ret));
@@ -169,9 +169,6 @@ public class ModuleWeaver: BaseModuleWeaver
 
     void AddInitCode(Collection<Instruction> ins, string format, PropertyDefinition[] properties, int genericOffset)
     {
-        var cultureInfoType = ModuleDefinition.ImportReference(typeof(CultureInfo)).Resolve();
-        var invariantCulture = cultureInfoType.Properties.Single(x => x.Name == "InvariantCulture");
-        var getInvariantCulture = ModuleDefinition.ImportReference(invariantCulture.GetMethod);
         ins.Add(Instruction.Create(OpCodes.Call, getInvariantCulture));
         ins.Add(Instruction.Create(OpCodes.Ldstr, format));
         ins.Add(Instruction.Create(OpCodes.Ldc_I4, properties.Length + genericOffset));
@@ -191,12 +188,12 @@ public class ModuleWeaver: BaseModuleWeaver
         ins.Add(Instruction.Create(OpCodes.Ldarg_0));
         ins.Add(Instruction.Create(OpCodes.Call, get));
 
-        if ( get.ReturnType.IsValueType)
+        if (get.ReturnType.IsValueType)
         {
             var returnType = ModuleDefinition.ImportReference(property.GetMethod.ReturnType);
-            if( returnType.FullName == "System.DateTime" )
+            if (returnType.FullName == "System.DateTime")
             {
-                var convertToUtc = ModuleDefinition.ImportReference(returnType.Resolve().FindMethod( "ToUniversalTime" ));
+                var convertToUtc = ModuleDefinition.ImportReference(returnType.Resolve().FindMethod("ToUniversalTime"));
 
                 var variable = new VariableDefinition(returnType);
                 variables.Add(variable);
@@ -204,6 +201,7 @@ public class ModuleWeaver: BaseModuleWeaver
                 ins.Add(Instruction.Create(OpCodes.Ldloca, variable));
                 ins.Add(Instruction.Create(OpCodes.Call, convertToUtc));
             }
+
             ins.Add(Instruction.Create(OpCodes.Box, returnType));
         }
         else
@@ -320,7 +318,7 @@ public class ModuleWeaver: BaseModuleWeaver
 
     void NewStringBuilder(Collection<Instruction> ins)
     {
-        var stringBuilderConstructor = ModuleDefinition.ImportReference(typeof (StringBuilder).GetConstructor(new Type[] {}));
+        var stringBuilderConstructor = ModuleDefinition.ImportReference(typeof(StringBuilder).GetConstructor(new Type[] { }));
         ins.Add(Instruction.Create(OpCodes.Newobj, stringBuilderConstructor));
         ins.Add(Instruction.Create(OpCodes.Stloc_1));
     }
@@ -340,7 +338,7 @@ public class ModuleWeaver: BaseModuleWeaver
     void While(
         Collection<Instruction> ins,
         Action<Collection<Instruction>> condition,
-        Action<Collection<Instruction>> body )
+        Action<Collection<Instruction>> body)
     {
         var loopBegin = Instruction.Create(OpCodes.Nop);
         var loopEnd = Instruction.Create(OpCodes.Nop);
@@ -373,9 +371,9 @@ public class ModuleWeaver: BaseModuleWeaver
     }
 
     void If(Collection<Instruction> ins,
-                    Action<Collection<Instruction>> condition,
-                    Action<Collection<Instruction>> thenStatement,
-                    Action<Collection<Instruction>> elseStatement)
+        Action<Collection<Instruction>> condition,
+        Action<Collection<Instruction>> thenStatement,
+        Action<Collection<Instruction>> elseStatement)
     {
         var ifEnd = Instruction.Create(OpCodes.Nop);
         var ifElse = Instruction.Create(OpCodes.Nop);
@@ -397,96 +395,102 @@ public class ModuleWeaver: BaseModuleWeaver
     void AppendSeparator(Collection<Instruction> ins)
     {
         If(ins,
-           c => c.Add(Instruction.Create(OpCodes.Ldloc_3)),
-           t => AppendString(t, ", "),
-           e =>
-               {
-                   ins.Add(Instruction.Create(OpCodes.Ldc_I4_1));
-                   ins.Add(Instruction.Create(OpCodes.Stloc_3));
-               });
+            c => c.Add(Instruction.Create(OpCodes.Ldloc_3)),
+            t => AppendString(t, ", "),
+            e =>
+            {
+                ins.Add(Instruction.Create(OpCodes.Ldc_I4_1));
+                ins.Add(Instruction.Create(OpCodes.Stloc_3));
+            });
     }
 
     string GetFormatString(TypeDefinition type, PropertyDefinition[] properties)
     {
-        var sb = new StringBuilder();
-        sb.Append("{{T: \"");
+        var builder = new StringBuilder();
+        builder.Append("{{T: \"");
         var offset = 0;
         if (!type.HasGenericParameters)
         {
-            sb.Append(type.Name);
+            builder.Append(type.Name);
         }
         else
         {
             var name = type.Name.Remove(type.Name.IndexOf('`'));
             offset = type.GenericParameters.Count;
-            sb.Append(name);
-            sb.Append('<');
+            builder.Append(name);
+            builder.Append('<');
             for (var i = 0; i < offset; i++)
             {
-                sb.Append("{");
-                sb.Append(i);
-                sb.Append("}");
+                builder.Append("{");
+                builder.Append(i);
+                builder.Append("}");
                 if (i + 1 != offset)
                 {
-                    sb.Append(", ");
+                    builder.Append(", ");
                 }
             }
-            sb.Append('>');
+
+            builder.Append('>');
         }
-        sb.Append("\", ");
+
+        builder.Append("\", ");
 
 
         for (var i = 0; i < properties.Length; i++)
         {
             var property = properties[i];
-            sb.Append(property.Name);
-            sb.Append(": ");
+            builder.Append(property.Name);
+            builder.Append(": ");
 
             if (HaveToAddQuotes(property.PropertyType))
             {
-                sb.Append('"');
+                builder.Append('"');
             }
 
-            sb.Append('{');
-            sb.Append(i + offset);
+            builder.Append('{');
+            builder.Append(i + offset);
 
             if (property.PropertyType.FullName == "System.DateTime")
             {
-                sb.Append(":O");
-            }
-            if( property.PropertyType.FullName == "System.TimeSpan" )
-            {
-                sb.Append( ":c" );
+                builder.Append(":O");
             }
 
-            sb.Append("}");
+            if (property.PropertyType.FullName == "System.TimeSpan")
+            {
+                builder.Append(":c");
+            }
+
+            builder.Append("}");
 
             if (HaveToAddQuotes(property.PropertyType))
             {
-                sb.Append('"');
+                builder.Append('"');
             }
 
             if (i != properties.Length - 1)
             {
-                sb.Append(", ");
+                builder.Append(", ");
             }
         }
-        sb.Append("}}");
-        var format = sb.ToString();
-        return format;
+
+        builder.Append("}}");
+        return builder.ToString();
     }
 
     static bool HaveToAddQuotes(TypeReference type)
     {
         var name = type.FullName;
-        if(name == "System.String" || name == "System.Char" || name == "System.DateTime" || name == "System.TimeSpan"
-            || name == "System.Guid")
+        if (name == "System.String" ||
+            name == "System.Char" ||
+            name == "System.DateTime" ||
+            name == "System.TimeSpan" ||
+            name == "System.Guid")
         {
             return true;
         }
 
         var resolved = type.Resolve();
-        return  resolved != null && resolved.IsEnum;
+        return resolved != null && resolved.IsEnum;
     }
 
     public override bool ShouldCleanReference => true;
