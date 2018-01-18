@@ -4,10 +4,12 @@
     <TargetFrameworks>net452;netstandard1.4</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Description>Generate ToString method from public properties.</Description>
+    <PackageTags>ToString, Formatting, ILWeaving, Fody, Cecil</PackageTags>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\CommonAssemblyInfo.cs">
-      <Link>CommonAssemblyInfo.cs</Link>
-    </Compile>
+    <PackageReference Include="Fody" Version="2.3.20" PrivateAssets="None" />
+    <PackageReference Include="FodyPackaging" Version="2.3.20" PrivateAssets="All" />
   </ItemGroup>
 </Project>

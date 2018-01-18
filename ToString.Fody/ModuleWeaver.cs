@@ -3,7 +3,6 @@ using System.Collections;
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
-using System.Xml.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
@@ -11,14 +10,10 @@ using Mono.Collections.Generic;
 using System.Globalization;
 using System.CodeDom.Compiler;
 using System.Diagnostics;
-using ToString.Fody.Extensions;
+using Fody;
 
-public class ModuleWeaver
+public class ModuleWeaver: BaseModuleWeaver
 {
-    public ModuleDefinition ModuleDefinition { get; set; }
-    public IAssemblyResolver AssemblyResolver { get; set; }
-    public XElement Config { get; set; }
-
     TypeReference stringBuilderType;
 
     MethodReference appendString;
@@ -28,30 +23,40 @@ public class ModuleWeaver
     MethodReference getInvariantCulture;
     MethodReference formatMethod;
 
-    public IEnumerable<TypeDefinition> GetMachingTypes()
+    public IEnumerable<TypeDefinition> GetMatchingTypes()
     {
-        return ModuleDefinition.GetTypes().Where(x => x.CustomAttributes.Any(a => a.AttributeType.Name == "ToStringAttribute"));
+        return ModuleDefinition.GetTypes()
+            .Where(x => x.CustomAttributes.Any(a => a.AttributeType.Name == "ToStringAttribute"));
     }
 
-    public void Execute()
+    public override IEnumerable<string> GetAssembliesForScanning()
     {
-        stringBuilderType = ModuleDefinition.ImportReference(typeof (StringBuilder));
-        appendString = ModuleDefinition.ImportReference(typeof(StringBuilder).GetMethod("Append", new[] { typeof(object) }));
-        moveNext = ModuleDefinition.ImportReference(typeof(IEnumerator).GetMethod("MoveNext"));
-        current = ModuleDefinition.ImportReference(typeof(IEnumerator).GetProperty("Current").GetGetMethod());
-        getEnumerator = ModuleDefinition.ImportReference(typeof(IEnumerable).GetMethod("GetEnumerator"));
-        formatMethod = ModuleDefinition.ImportReference(ModuleDefinition.TypeSystem.String.Resolve().FindMethod("Format", "IFormatProvider", "String", "Object[]"));
+        yield return "mscorlib";
+        yield return "System.Runtime";
+        yield return "netstandard";
+    }
 
-        var cultureInfoType = ModuleDefinition.ImportReference(typeof(CultureInfo)).Resolve();
+    public override void Execute()
+    {
+        var stringBuildType = FindType("System.Text.StringBuilder");
+        stringBuilderType = ModuleDefinition.ImportReference(stringBuildType);
+        appendString = ModuleDefinition.ImportReference(stringBuildType.FindMethod("Append", "Object"));
+        var enumeratorType = FindType("System.Collections.IEnumerator");
+        moveNext = ModuleDefinition.ImportReference(enumeratorType.FindMethod("MoveNext"));
+        current = ModuleDefinition.ImportReference(enumeratorType.Properties.Single(x=>x.Name=="Current").GetMethod);
+        var enumerableType = FindType("System.Collections.IEnumerable");
+        getEnumerator = ModuleDefinition.ImportReference(enumerableType.FindMethod("GetEnumerator"));
+        var stringType = FindType("System.String");
+        formatMethod = ModuleDefinition.ImportReference(stringType.FindMethod("Format", "IFormatProvider", "String", "Object[]"));
+
+        var cultureInfoType = FindType("System.Globalization.CultureInfo");
         var invariantCulture = cultureInfoType.Properties.Single(x => x.Name == "InvariantCulture");
         getInvariantCulture = ModuleDefinition.ImportReference(invariantCulture.GetMethod);
 
-        foreach (var type in GetMachingTypes())
+        foreach (var type in GetMatchingTypes())
         {
             AddToString(type);
         }
-
-        RemoveReference();
     }
 
     void AddToString(TypeDefinition type)
@@ -484,14 +489,7 @@ public class ModuleWeaver
         return  resolved != null && resolved.IsEnum;
     }
 
-    void RemoveReference()
-    {
-        var referenceToRemove = ModuleDefinition.AssemblyReferences.FirstOrDefault(x => x.Name == "ToString");
-        if (referenceToRemove != null)
-        {
-            ModuleDefinition.AssemblyReferences.Remove(referenceToRemove);
-        }
-    }
+    public override bool ShouldCleanReference => true;
 
     void RemoveFodyAttributes(TypeDefinition type, PropertyDefinition[] allProperties)
     {

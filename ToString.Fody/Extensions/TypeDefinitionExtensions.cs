@@ -3,7 +3,7 @@ using System.Linq;
 using Mono.Cecil;
 using Mono.Collections.Generic;
 
-public static class TypeDefinitionExtensions
+static class TypeDefinitionExtensions
 {
     public static MethodDefinition FindMethod(this TypeDefinition typeDefinition, string method, params string[] paramTypes)
     {
@@ -38,15 +38,14 @@ public static class TypeDefinitionExtensions
 
         if (type.IsGenericParameter)
         {
-            var genericParameter = type as GenericParameter;
+            var genericParameter = (GenericParameter)type;
 
             var current = targetType;
             var currentResolved = current.Resolve();
 
             while (currentResolved.FullName != genericParameter.DeclaringType.FullName)            {                if (currentResolved.BaseType == null)                {                    return type;                }                current = currentResolved.BaseType;                currentResolved = current.Resolve();            }            if (current is GenericInstanceType genericInstanceType)
             {
-                var newType = genericInstanceType.GenericArguments[genericParameter.Position];
-                return newType;
+                return genericInstanceType.GenericArguments[genericParameter.Position];
             }
 
             return type;
@@ -70,7 +69,7 @@ public static class TypeDefinitionExtensions
                 while (parent != null && propertyType.FullName != (parentResolved = parent.Resolve()).FullName)
                 {
                     parentReference = parentResolved.BaseType;
-                    parent = parentResolved.BaseType != null ? parentResolved.BaseType.Resolve() : null;
+                    parent = parentResolved.BaseType?.Resolve();
                 }
 
                 genericInstanceType = parentReference as GenericInstanceType;

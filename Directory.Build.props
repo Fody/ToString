@@ -2,8 +2,7 @@
 <Project>
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <LangVersion>latest</LangVersion>
-    <DebugType>full</DebugType>
+    <Version>1.9.1</Version>
   </PropertyGroup>
 </Project>

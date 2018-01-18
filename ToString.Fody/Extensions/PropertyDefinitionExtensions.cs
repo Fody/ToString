@@ -1,24 +1,22 @@
 ﻿using Mono.Cecil;
 
-namespace ToString.Fody.Extensions
+public static class PropertyDefinitionExtensions
 {
-    public static class PropertyDefinitionExtensions
+    public static MethodReference GetGetMethod(this PropertyDefinition property, TypeReference targetType)
     {
-        public static MethodReference GetGetMethod(this PropertyDefinition property, TypeReference targetType)
+        MethodReference method = property.GetMethod;
+        if (method.DeclaringType.HasGenericParameters)
         {
-            MethodReference method = property.GetMethod;
-            if (method.DeclaringType.HasGenericParameters)
+            var genericInstanceType = property.DeclaringType.GetGenericInstanceType(targetType);
+            var newRef = new MethodReference(method.Name, method.ReturnType)
             {
-                var genericInstanceType = property.DeclaringType.GetGenericInstanceType(targetType);
-                var newRef = new MethodReference(method.Name, method.ReturnType)
-                {
-                    DeclaringType = genericInstanceType,
-                    HasThis = true
-                };
+                DeclaringType = genericInstanceType,
+                HasThis = true
+            };
 
-                return newRef;
-            }
-            return method;
+            return newRef;
         }
+
+        return method;
     }
 }
