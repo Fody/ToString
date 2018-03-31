@@ -7,11 +7,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
-    <PackageReference Include="FodyHelpers" Version="2.3.25" />
+    <PackageReference Include="FodyHelpers" Version="3.0.0" />
     <PackageReference Include="xunit" Version="2.3.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
     <ProjectReference Include="..\ToString.Fody\ToString.Fody.csproj" />
     <ProjectReference Include="..\ToString\ToString.csproj" />
     <ProjectReference Include="..\AssemblyToProcess\AssemblyToProcess.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
 </Project>
