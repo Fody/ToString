@@ -20,10 +20,6 @@ public class ModuleWeaver : BaseModuleWeaver
     MethodReference getEnumerator;
     MethodReference getInvariantCulture;
     MethodReference formatMethod;
-    TypeDefinition stringType;
-    TypeReference objectTypeRef;
-    TypeDefinition objectTypeDef;
-    TypeReference booleanType;
 
     public IEnumerable<TypeDefinition> GetMatchingTypes()
     {
@@ -42,9 +38,6 @@ public class ModuleWeaver : BaseModuleWeaver
     public override void Execute()
     {
         var stringBuildType = FindType("System.Text.StringBuilder");
-        objectTypeDef = FindType("System.Object");
-        objectTypeRef = ModuleDefinition.ImportReference(objectTypeDef);
-        booleanType = ModuleDefinition.ImportReference(FindType("System.Boolean"));
         stringBuilderType = ModuleDefinition.ImportReference(stringBuildType);
         appendString = ModuleDefinition.ImportReference(stringBuildType.FindMethod("Append", "Object"));
         var enumeratorType = FindType("System.Collections.IEnumerator");
@@ -52,8 +45,7 @@ public class ModuleWeaver : BaseModuleWeaver
         current = ModuleDefinition.ImportReference(enumeratorType.Properties.Single(x => x.Name == "Current").GetMethod);
         var enumerableType = FindType("System.Collections.IEnumerable");
         getEnumerator = ModuleDefinition.ImportReference(enumerableType.FindMethod("GetEnumerator"));
-        stringType = FindType("System.String");
-        formatMethod = ModuleDefinition.ImportReference(stringType.FindMethod("Format", "IFormatProvider", "String", "Object[]"));
+        formatMethod = ModuleDefinition.ImportReference(TypeSystem.StringDefinition.FindMethod("Format", "IFormatProvider", "String", "Object[]"));
 
         var cultureInfoType = FindType("System.Globalization.CultureInfo");
         var invariantCulture = cultureInfoType.Properties.Single(x => x.Name == "InvariantCulture");
@@ -69,9 +61,9 @@ public class ModuleWeaver : BaseModuleWeaver
     {
         var methodAttributes = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual;
 
-        var method = new MethodDefinition("ToString", methodAttributes, stringType);
+        var method = new MethodDefinition("ToString", methodAttributes, TypeSystem.StringReference);
         var variables = method.Body.Variables;
-        variables.Add(new VariableDefinition(new ArrayType(objectTypeRef)));
+        variables.Add(new VariableDefinition(new ArrayType(TypeSystem.ObjectReference)));
         var allProperties = type.GetProperties().Where(x => !x.HasParameters).ToArray();
         var properties = RemoveIgnoredProperties(allProperties);
 
@@ -89,9 +81,9 @@ public class ModuleWeaver : BaseModuleWeaver
             var enumeratorType = ModuleDefinition.ImportReference(typeof(IEnumerator));
             variables.Add(new VariableDefinition(enumeratorType));
 
-            variables.Add(new VariableDefinition(booleanType));
+            variables.Add(new VariableDefinition(TypeSystem.BooleanReference));
 
-            variables.Add(new VariableDefinition(new ArrayType(objectTypeRef)));
+            variables.Add(new VariableDefinition(new ArrayType(TypeSystem.ObjectReference)));
         }
 
         var genericOffset = !type.HasGenericParameters ? 0 : type.GenericParameters.Count;
@@ -128,7 +120,7 @@ public class ModuleWeaver : BaseModuleWeaver
     {
         var typeType = ModuleDefinition.ImportReference(typeof(Type)).Resolve();
         var memberInfoType = ModuleDefinition.ImportReference(typeof(System.Reflection.MemberInfo)).Resolve();
-        var getTypeMethod = ModuleDefinition.ImportReference(objectTypeDef.FindMethod("GetType"));
+        var getTypeMethod = ModuleDefinition.ImportReference(TypeSystem.ObjectDefinition.FindMethod("GetType"));
         var getGenericArgumentsMethod = ModuleDefinition.ImportReference(typeType.FindMethod("GetGenericArguments"));
         var nameProperty = memberInfoType.Properties.Single(x => x.Name == "Name");
         var nameGet = ModuleDefinition.ImportReference(nameProperty.GetMethod);
@@ -161,8 +153,8 @@ public class ModuleWeaver : BaseModuleWeaver
         var version = typeof(ModuleWeaver).Assembly.GetName().Version.ToString();
 
         var generatedAttribute = new CustomAttribute(generatedConstructor);
-        generatedAttribute.ConstructorArguments.Add(new CustomAttributeArgument(stringType, "Fody.ToString"));
-        generatedAttribute.ConstructorArguments.Add(new CustomAttributeArgument(stringType, version));
+        generatedAttribute.ConstructorArguments.Add(new CustomAttributeArgument(TypeSystem.StringReference, "Fody.ToString"));
+        generatedAttribute.ConstructorArguments.Add(new CustomAttributeArgument(TypeSystem.StringReference, version));
         method.CustomAttributes.Add(generatedAttribute);
 
         var debuggerConstructor = ModuleDefinition.ImportReference(typeof(DebuggerNonUserCodeAttribute).GetConstructor(Type.EmptyTypes));
@@ -182,7 +174,7 @@ public class ModuleWeaver : BaseModuleWeaver
         ins.Add(Instruction.Create(OpCodes.Call, getInvariantCulture));
         ins.Add(Instruction.Create(OpCodes.Ldstr, format));
         ins.Add(Instruction.Create(OpCodes.Ldc_I4, properties.Length + genericOffset));
-        ins.Add(Instruction.Create(OpCodes.Newarr, objectTypeRef));
+        ins.Add(Instruction.Create(OpCodes.Newarr, TypeSystem.ObjectReference));
         ins.Add(Instruction.Create(OpCodes.Stloc_0));
     }
 
@@ -268,7 +260,7 @@ public class ModuleWeaver : BaseModuleWeaver
                                         t.Add(Instruction.Create(OpCodes.Ldstr, format));
 
                                         t.Add(Instruction.Create(OpCodes.Ldc_I4, 1));
-                                        t.Add(Instruction.Create(OpCodes.Newarr, objectTypeRef));
+                                        t.Add(Instruction.Create(OpCodes.Newarr, TypeSystem.ObjectReference));
                                         t.Add(Instruction.Create(OpCodes.Stloc, body.Variables[4]));
                                         t.Add(Instruction.Create(OpCodes.Ldloc, body.Variables[4]));
 
