@@ -32,7 +32,8 @@ static class TypeDefinitionExtensions
     }
 
     public static TypeReference GetGenericInstanceType(this TypeReference type, TypeReference targetType)
-    {        if (targetType is GenericInstanceType genericInstance)
+    {
+        if (targetType is GenericInstanceType genericInstance)
         {
             return genericInstance;
         }
@@ -44,7 +45,17 @@ static class TypeDefinitionExtensions
             var current = targetType;
             var currentResolved = current.Resolve();
 
-            while (currentResolved.FullName != genericParameter.DeclaringType.FullName)            {                if (currentResolved.BaseType == null)                {                    return type;                }                current = currentResolved.BaseType;                currentResolved = current.Resolve();            }            if (current is GenericInstanceType genericInstanceType)
+            while (currentResolved.FullName != genericParameter.DeclaringType.FullName)
+            {
+                if (currentResolved.BaseType == null)
+                {
+                    return type;
+                }
+                current = currentResolved.BaseType;
+                currentResolved = current.Resolve();
+            }
+
+            if (current is GenericInstanceType genericInstanceType)
             {
                 return genericInstanceType.GenericArguments[genericParameter.Position];
             }
