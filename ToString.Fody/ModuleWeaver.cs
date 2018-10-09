@@ -65,7 +65,7 @@ public class ModuleWeaver : BaseModuleWeaver
         var variables = method.Body.Variables;
         variables.Add(new VariableDefinition(new ArrayType(TypeSystem.ObjectReference)));
         var allProperties = type.GetProperties().Where(x => !x.HasParameters).ToArray();
-        var properties = RemoveIgnoredProperties(allProperties);
+        var properties = RemoveIgnoredProperties(allProperties).Distinct(PropertyNameEqualityComparer.Default).ToArray();
 
         var format = GetFormatString(type, properties);
 
@@ -506,10 +506,26 @@ public class ModuleWeaver : BaseModuleWeaver
         }
     }
 
-    PropertyDefinition[] RemoveIgnoredProperties(PropertyDefinition[] allProperties)
+    IEnumerable<PropertyDefinition> RemoveIgnoredProperties(IEnumerable<PropertyDefinition> allProperties)
     {
         return allProperties
-            .Where(x => x.CustomAttributes.All(y => y.AttributeType.Name != "IgnoreDuringToStringAttribute"))
-            .ToArray();
+            .Where(x => x.CustomAttributes.All(y => y.AttributeType.Name != "IgnoreDuringToStringAttribute"));
+    }
+
+    class PropertyNameEqualityComparer : IEqualityComparer<PropertyDefinition>
+    {
+        public bool Equals(PropertyDefinition x, PropertyDefinition y)
+            => (x == null && y == null) || (x?.Name == y?.Name);
+
+        public int GetHashCode(PropertyDefinition obj)
+        {
+            if (obj == null)
+            {
+                throw new ArgumentNullException(nameof(obj));
+            }
+            return obj.Name.GetHashCode();
+        }
+
+        public static readonly PropertyNameEqualityComparer Default = new PropertyNameEqualityComparer();
     }
 }

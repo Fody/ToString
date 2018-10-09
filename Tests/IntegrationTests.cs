@@ -410,4 +410,14 @@ public class IntegrationTests
 
         Assert.Equal( "{T: \"GuidClass\", X: 1, Y: \"00000001-0002-0003-0405-060708090a0b\"}", result );
     }
+
+    [Fact]
+    public void ClassWithDrivedPropertiesTest()
+    {
+        var type = assembly.GetType("ClassWithDrivedProperties");
+        dynamic instance = Activator.CreateInstance(type);
+        var result = instance.ToString();
+
+        Assert.Equal("{T: \"ClassWithDrivedProperties\", NormalProperty: \"New\", INormalProperty.NormalProperty: \"Interface\", VirtualProperty: \"Override Virtual\", AbstractProperty: \"Override Abstract\"}", result);
+    }
 }
