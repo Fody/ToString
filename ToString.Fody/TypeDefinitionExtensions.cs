@@ -16,19 +16,17 @@ static class TypeDefinitionExtensions
                type.Interfaces.Any(i => i.InterfaceType.Name.Equals("IEnumerable"));
     }
 
-    public static PropertyDefinition[] GetProperties(this TypeDefinition type)
+    public static IEnumerable<PropertyDefinition> GetProperties(this TypeDefinition type)
     {
-        var properties = new List<PropertyDefinition>();
-
         var currentType = type;
-        do
+        while (currentType.FullName != typeof(object).FullName)
         {
-            var currentProperties = currentType.Properties;
-            properties.AddRange(currentProperties);
+            foreach (var currentProperty in currentType.Properties)
+            {
+                yield return currentProperty;
+            }
             currentType = currentType.BaseType.Resolve();
-        } while (currentType.FullName != typeof(object).FullName);
-
-        return properties.ToArray();
+        }
     }
 
     public static TypeReference GetGenericInstanceType(this TypeReference type, TypeReference targetType)
