@@ -269,7 +269,7 @@ public class ModuleWeaver
                                         t.Add(Instruction.Create(OpCodes.Stelem_Ref));
                                         t.Add(Instruction.Create(OpCodes.Ldloc, body.Variables[4])); 
 
-                                        t.Add(Instruction.Create(OpCodes.Call, formatMethod));
+                                        t.Add(Instruction.Create(OpCodes.Call, formatMethod)); 
                                     },
                                     e => e.Add(Instruction.Create(OpCodes.Ldstr, "null")));
                                 ins.Add(Instruction.Create(OpCodes.Callvirt, appendString));
