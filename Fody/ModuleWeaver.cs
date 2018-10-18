@@ -187,12 +187,12 @@ public class ModuleWeaver
         ins.Add(Instruction.Create(OpCodes.Ldarg_0));
         ins.Add(Instruction.Create(OpCodes.Call, get));
 
-        if (get.ReturnType.IsValueType)
+        if ( get.ReturnType.IsValueType)
         {
             var returnType = ModuleDefinition.ImportReference(property.GetMethod.ReturnType);
-            if ( returnType.FullName == "System.DateTime" )
+            if( returnType.FullName == "System.DateTime" )
             {
-                var convertToUtc = ModuleDefinition.ImportReference(returnType.Resolve().FindMethod("ToUniversalTime"));
+                var convertToUtc = ModuleDefinition.ImportReference(returnType.Resolve().FindMethod( "ToUniversalTime" ));
                 
                 var variable = new VariableDefinition(returnType);
                 variables.Add(variable);
