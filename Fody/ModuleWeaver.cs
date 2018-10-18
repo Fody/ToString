@@ -35,7 +35,7 @@ public class ModuleWeaver
 
     public void Execute()
     {
-        stringBuilderType = ModuleDefinition.ImportReference(typeof(StringBuilder));
+        stringBuilderType = ModuleDefinition.ImportReference(typeof (StringBuilder));
         appendString = ModuleDefinition.ImportReference(typeof(StringBuilder).GetMethod("Append", new[] { typeof(object) }));
         moveNext = ModuleDefinition.ImportReference(typeof(IEnumerator).GetMethod("MoveNext"));
         current = ModuleDefinition.ImportReference(typeof(IEnumerator).GetProperty("Current").GetGetMethod());
@@ -75,7 +75,7 @@ public class ModuleWeaver
         {
             method.Body.Variables.Add(new VariableDefinition(stringBuilderType));
 
-            var enumeratorType = ModuleDefinition.ImportReference(typeof(IEnumerator));
+            var enumeratorType = ModuleDefinition.ImportReference(typeof (IEnumerator));
             method.Body.Variables.Add(new VariableDefinition(enumeratorType));
 
             method.Body.Variables.Add(new VariableDefinition(ModuleDefinition.TypeSystem.Boolean));
@@ -183,17 +183,17 @@ public class ModuleWeaver
         ins.Add(Instruction.Create(OpCodes.Ldc_I4, index));
 
         var get = ModuleDefinition.ImportReference(property.GetGetMethod(targetType));
-
+            
         ins.Add(Instruction.Create(OpCodes.Ldarg_0));
         ins.Add(Instruction.Create(OpCodes.Call, get));
 
         if (get.ReturnType.IsValueType)
         {
             var returnType = ModuleDefinition.ImportReference(property.GetMethod.ReturnType);
-            if (returnType.FullName == "System.DateTime")
+            if ( returnType.FullName == "System.DateTime" )
             {
                 var convertToUtc = ModuleDefinition.ImportReference(returnType.Resolve().FindMethod("ToUniversalTime"));
-
+                
                 var variable = new VariableDefinition(returnType);
                 variables.Add(variable);
                 ins.Add(Instruction.Create(OpCodes.Stloc, variable));
@@ -211,7 +211,7 @@ public class ModuleWeaver
             {
                 AssignFalseToFirstFLag(ins);
 
-                If(ins,
+                If(ins, 
                     nc => nc.Add(Instruction.Create(OpCodes.Dup)),
                     nt =>
                     {
@@ -253,21 +253,21 @@ public class ModuleWeaver
                                             format = "{0}";
                                         }
 
-                                        t.Add(Instruction.Create(OpCodes.Ldstr, format));
+                                        t.Add(Instruction.Create(OpCodes.Ldstr, format));  
 
                                         t.Add(Instruction.Create(OpCodes.Ldc_I4, 1));
-                                        t.Add(Instruction.Create(OpCodes.Newarr, ModuleDefinition.TypeSystem.Object));
-                                        t.Add(Instruction.Create(OpCodes.Stloc, body.Variables[4]));
-                                        t.Add(Instruction.Create(OpCodes.Ldloc, body.Variables[4]));
+                                        t.Add(Instruction.Create(OpCodes.Newarr, ModuleDefinition.TypeSystem.Object)); 
+                                        t.Add(Instruction.Create(OpCodes.Stloc, body.Variables[4])); 
+                                        t.Add(Instruction.Create(OpCodes.Ldloc, body.Variables[4])); 
 
-                                        t.Add(Instruction.Create(OpCodes.Ldc_I4_0));
+                                        t.Add(Instruction.Create(OpCodes.Ldc_I4_0)); 
 
-                                        t.Add(Instruction.Create(OpCodes.Ldloc_2));
-                                        t.Add(Instruction.Create(OpCodes.Callvirt, current));
+                                        t.Add(Instruction.Create(OpCodes.Ldloc_2)); 
+                                        t.Add(Instruction.Create(OpCodes.Callvirt, current)); 
 
 
                                         t.Add(Instruction.Create(OpCodes.Stelem_Ref));
-                                        t.Add(Instruction.Create(OpCodes.Ldloc, body.Variables[4]));
+                                        t.Add(Instruction.Create(OpCodes.Ldloc, body.Variables[4])); 
 
                                         t.Add(Instruction.Create(OpCodes.Call, formatMethod));
                                     },
@@ -277,13 +277,13 @@ public class ModuleWeaver
                             });
 
                         AppendString(ins, ListEnd);
-                        StringBuilderToString(ins);
+                        StringBuilderToString(ins);       
                     },
                     nf =>
                     {
                         ins.Add(Instruction.Create(OpCodes.Pop));
-                        ins.Add(Instruction.Create(OpCodes.Ldstr, "null"));
-                    });
+                        ins.Add(Instruction.Create(OpCodes.Ldstr, "null")); 
+                    });              
             }
             else
             {
@@ -297,7 +297,7 @@ public class ModuleWeaver
                     e =>
                     {
                         ins.Add(Instruction.Create(OpCodes.Pop));
-                        ins.Add(Instruction.Create(OpCodes.Ldstr, "null"));
+                        ins.Add(Instruction.Create(OpCodes.Ldstr, "null"));   
                     });
             }
         }
@@ -316,7 +316,7 @@ public class ModuleWeaver
 
     void NewStringBuilder(Collection<Instruction> ins)
     {
-        var stringBuilderConstructor = ModuleDefinition.ImportReference(typeof(StringBuilder).GetConstructor(new Type[] { }));
+        var stringBuilderConstructor = ModuleDefinition.ImportReference(typeof (StringBuilder).GetConstructor(new Type[] {}));
         ins.Add(Instruction.Create(OpCodes.Newobj, stringBuilderConstructor));
         ins.Add(Instruction.Create(OpCodes.Stloc_1));
     }
@@ -336,7 +336,7 @@ public class ModuleWeaver
     void While(
         Collection<Instruction> ins,
         Action<Collection<Instruction>> condition,
-        Action<Collection<Instruction>> body)
+        Action<Collection<Instruction>> body )
     {
         var loopBegin = Instruction.Create(OpCodes.Nop);
         var loopEnd = Instruction.Create(OpCodes.Nop);
@@ -455,13 +455,13 @@ public class ModuleWeaver
             sb.Append('{');
             sb.Append(i + offset);
 
-            if (property.PropertyType.FullName == "System.DateTime")
+            if( property.PropertyType.FullName == "System.DateTime" )
             {
                 sb.Append(":O");
             }
             if (property.PropertyType.FullName == "System.TimeSpan")
             {
-                sb.Append(":c");
+                sb.Append( ":c" );
             }
 
             sb.Append("}");
@@ -489,14 +489,14 @@ public class ModuleWeaver
     static bool HaveToAddQuotes(TypeReference type)
     {
         var name = type.FullName;
-        if (name == "System.String" || name == "System.Char" || name == "System.DateTime" || name == "System.TimeSpan"
+        if(name == "System.String" || name == "System.Char" || name == "System.DateTime" || name == "System.TimeSpan"
             || name == "System.Guid")
         {
             return true;
         }
 
         var resolved = type.Resolve();
-        return resolved != null && resolved.IsEnum;
+        return  resolved != null && resolved.IsEnum;
     }
 
     void RemoveReference()
