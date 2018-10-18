@@ -287,7 +287,7 @@ public class ModuleWeaver
             }
             else
             {
-                If(ins,
+                If(ins, 
                     c =>
                     {
                         ins.Add(Instruction.Create(OpCodes.Dup));
@@ -455,11 +455,11 @@ public class ModuleWeaver
             sb.Append('{');
             sb.Append(i + offset);
 
-            if( property.PropertyType.FullName == "System.DateTime" )
+            if (property.PropertyType.FullName == "System.DateTime")
             {
                 sb.Append(":O");
             }
-            if (property.PropertyType.FullName == "System.TimeSpan")
+            if( property.PropertyType.FullName == "System.TimeSpan" )
             {
                 sb.Append( ":c" );
             }
