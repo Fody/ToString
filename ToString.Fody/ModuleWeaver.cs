@@ -223,7 +223,7 @@ public class ModuleWeaver : BaseModuleWeaver
 
                         NewStringBuilder(nt);
 
-                        AppendString(nt, "[");
+                        AppendString(nt, ListStart);
 
                         While(nt,
                             c =>
@@ -280,7 +280,7 @@ public class ModuleWeaver : BaseModuleWeaver
                                 ins.Add(Instruction.Create(OpCodes.Pop));
                             });
 
-                        AppendString(ins, "]");
+                        AppendString(ins, ListEnd);
                         StringBuilderToString(ins);
                     },
                     nf =>
@@ -398,7 +398,7 @@ public class ModuleWeaver : BaseModuleWeaver
     {
         If(ins,
             c => c.Add(Instruction.Create(OpCodes.Ldloc_3)),
-            t => AppendString(t, ", "),
+            t => AppendString(t, PropertiesSeparator),
             e =>
             {
                 ins.Add(Instruction.Create(OpCodes.Ldc_I4_1));
@@ -406,43 +406,53 @@ public class ModuleWeaver : BaseModuleWeaver
             });
     }
 
+
     string GetFormatString(TypeDefinition type, PropertyDefinition[] properties)
     {
         var builder = new StringBuilder();
-        builder.Append("{{T: \"");
         var offset = 0;
-        if (!type.HasGenericParameters)
+
+        if (WrapWithBrackets)
         {
-            builder.Append(type.Name);
+            builder.Append("{{");
         }
-        else
+
+        if (WriteTypeName)
         {
-            var name = type.Name.Remove(type.Name.IndexOf('`'));
-            offset = type.GenericParameters.Count;
-            builder.Append(name);
-            builder.Append('<');
-            for (var i = 0; i < offset; i++)
+            builder.AppendFormat("T{0}\"", PropertyNameToValueSeparator);
+
+            if (!type.HasGenericParameters)
             {
-                builder.Append("{");
-                builder.Append(i);
-                builder.Append("}");
-                if (i + 1 != offset)
+                builder.Append(type.Name);
+            }
+            else
+            {
+                var name = type.Name.Remove(type.Name.IndexOf('`'));
+                offset = type.GenericParameters.Count;
+                builder.Append(name);
+                builder.Append('<');
+                for (var i = 0; i < offset; i++)
                 {
-                    builder.Append(", ");
+                    builder.Append("{");
+                    builder.Append(i);
+                    builder.Append("}");
+                    if (i + 1 != offset)
+                    {
+                        builder.Append(PropertiesSeparator);
+                    }
                 }
+
+                builder.Append('>');
             }
 
-            builder.Append('>');
+            builder.Append("\"" + PropertiesSeparator);
         }
-
-        builder.Append("\", ");
-
 
         for (var i = 0; i < properties.Length; i++)
         {
             var property = properties[i];
             builder.Append(property.Name);
-            builder.Append(": ");
+            builder.Append(PropertyNameToValueSeparator);
 
             if (HaveToAddQuotes(property.PropertyType))
             {
@@ -471,11 +481,15 @@ public class ModuleWeaver : BaseModuleWeaver
 
             if (i != properties.Length - 1)
             {
-                builder.Append(", ");
+                builder.Append(PropertiesSeparator);
             }
         }
 
-        builder.Append("}}");
+        if (WrapWithBrackets)
+        {
+            builder.Append("}}");
+        }
+
         return builder.ToString();
     }
 
@@ -523,9 +537,32 @@ public class ModuleWeaver : BaseModuleWeaver
             {
                 throw new ArgumentNullException(nameof(obj));
             }
+
             return obj.Name.GetHashCode();
         }
 
         public static readonly PropertyNameEqualityComparer Default = new PropertyNameEqualityComparer();
+    }
+
+    string PropertyNameToValueSeparator => ReadStringValueFromConfig("PropertyNameToValueSeparator", ": ");
+    string PropertiesSeparator => ReadStringValueFromConfig("PropertiesSeparator", ", ");
+    string ListStart => ReadStringValueFromConfig("ListStart", "[");
+    string ListEnd => ReadStringValueFromConfig("ListEnd", "]");
+    bool WrapWithBrackets => ReadBoolValueFromConfig("WrapWithBrackets", true);
+    bool WriteTypeName => ReadBoolValueFromConfig("WriteTypeName", true);
+
+    string ReadStringValueFromConfig(string nodeName, string defaultValue)
+    {
+        var node = Config?.Attributes().FirstOrDefault(a => a.Name.LocalName == nodeName);
+        return node?.Value ?? defaultValue;
+    }
+
+    bool ReadBoolValueFromConfig(string nodeName, bool defaultValue)
+    {
+        var node = Config?.Attributes().FirstOrDefault(a => a.Name.LocalName == nodeName);
+        bool nodeValue;
+        return node != null && bool.TryParse(node.Value, out nodeValue)
+            ? nodeValue
+            : defaultValue;
     }
 }

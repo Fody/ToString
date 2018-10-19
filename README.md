@@ -33,7 +33,6 @@ The `Update-Package Fody` is required since NuGet always defaults to the oldest,
 Add `<ToString/>` to [FodyWeavers.xml](https://github.com/Fody/Fody#add-fodyweaversxml)
 
 ```xml
-<?xml version="1.0" encoding="utf-8" ?>
 <Weavers>
   <ToString/>
 </Weavers>
@@ -42,37 +41,122 @@ Add `<ToString/>` to [FodyWeavers.xml](https://github.com/Fody/Fody#add-fodyweav
 
 ## Your Code
 
-    [ToString]
-    class TestClass
-    {
-        public int Foo { get; set; }
+```csharp
+[ToString]
+class TestClass
+{
+    public int Foo { get; set; }
 
-        public double Bar { get; set; }
-        
-        [IgnoreDuringToString]
-        public string Baz { get; set; }
-    }
+    public double Bar { get; set; }
+    
+    [IgnoreDuringToString]
+    public string Baz { get; set; }
+}
+```
 
 
 ## What gets compiled
 
-    class TestClass
-    {
-        public int Foo { get; set; }
+```csharp
+class TestClass
+{
+    public int Foo { get; set; }
 
-        public double Bar { get; set; }
-        
-        public string Baz { get; set; }
-        
-        public override string ToString()
-        {
-            return string.Format(
-                CultureInfo.InvariantCulture, 
-                "{{T: TestClass, Foo: {0}, Bar: {1}}}",
-                this.Foo,
-                this.Bar);
-        }
+    public double Bar { get; set; }
+    
+    public string Baz { get; set; }
+    
+    public override string ToString()
+    {
+        return string.Format(
+            CultureInfo.InvariantCulture, 
+            "{{T: TestClass, Foo: {0}, Bar: {1}}}",
+            Foo,
+            Bar);
     }
+}
+```
+
+
+## Options
+
+
+### PropertyNameToValueSeparator
+
+Default: `: `
+
+For example:
+
+```xml
+<Weavers>
+  <ToString PropertyNameToValueSeparator="->"/>
+</Weavers>
+```
+
+
+### PropertiesSeparator
+
+Default: `, `
+
+For example:
+
+```xml
+<Weavers>
+  <ToString PropertiesSeparator=". "/>
+</Weavers>
+```
+
+
+### WrapWithBrackets
+
+Default: `true`
+
+For example:
+
+```xml
+<Weavers>
+  <ToString WrapWithBrackets="false"/>
+</Weavers>
+```
+
+
+### WriteTypeName
+
+Default: `true`
+
+For example:
+
+```xml
+<Weavers>
+  <ToString WriteTypeName="false"/>
+</Weavers>
+```
+
+
+### ListStart
+
+Default: `[`
+
+For example:
+
+```xml
+<Weavers>
+  <ToString ListStart="("/>
+</Weavers>
+```
+
+
+### ListEnd
+
+Default: `]`
+
+For example:
+
+```xml
+<Weavers>
+  <ToString ListEnd=")"/>
+</Weavers>
+```
 
 
 ## Icon
