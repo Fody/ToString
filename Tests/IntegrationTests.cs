@@ -412,12 +412,12 @@ public class IntegrationTests
     }
 
     [Fact]
-    public void ClassWithDrivedPropertiesTest()
+    public void ClassWithDerivedPropertiesTest()
     {
-        var type = assembly.GetType("ClassWithDrivedProperties");
+        var type = assembly.GetType("ClassWithDerivedProperties");
         dynamic instance = Activator.CreateInstance(type);
         var result = instance.ToString();
 
-        Assert.Equal("{T: \"ClassWithDrivedProperties\", NormalProperty: \"New\", INormalProperty.NormalProperty: \"Interface\", VirtualProperty: \"Override Virtual\", AbstractProperty: \"Override Abstract\"}", result);
+        Assert.Equal("{T: \"ClassWithDerivedProperties\", NormalProperty: \"New\", INormalProperty.NormalProperty: \"Interface\", VirtualProperty: \"Override Virtual\", AbstractProperty: \"Override Abstract\"}", result);
     }
 }

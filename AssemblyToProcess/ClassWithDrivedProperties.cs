@@ -1,6 +1,4 @@
-﻿using ReferencedDependency;
-
-public abstract class SuperClass
+﻿public abstract class SuperClass
 {
     public string NormalProperty => "Normal";
     public virtual string VirtualProperty => "Virtual";
@@ -13,7 +11,7 @@ public interface INormalProperty
 }
 
 [ToString]
-public class ClassWithDrivedProperties : SuperClass, INormalProperty
+public class ClassWithDerivedProperties : SuperClass, INormalProperty
 {
     public new string NormalProperty => "New";
     string INormalProperty.NormalProperty => "Interface";
