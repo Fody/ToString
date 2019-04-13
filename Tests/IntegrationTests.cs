@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Reflection;
 using Fody;
 using Xunit;
-#pragma warning disable 618
+using Xunit.Abstractions;
 
-public class IntegrationTests
+public class IntegrationTests :
+    XunitLoggingBase
 {
     static Assembly assembly;
     static TestResult testResult;
@@ -419,5 +420,10 @@ public class IntegrationTests
         var result = instance.ToString();
 
         Assert.Equal("{T: \"ClassWithDerivedProperties\", NormalProperty: \"New\", INormalProperty.NormalProperty: \"Interface\", VirtualProperty: \"Override Virtual\", AbstractProperty: \"Override Abstract\"}", result);
+    }
+
+    public IntegrationTests(ITestOutputHelper output) : 
+        base(output)
+    {
     }
 }

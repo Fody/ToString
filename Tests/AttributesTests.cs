@@ -2,8 +2,10 @@
 using System.Reflection;
 using Fody;
 using Xunit;
+using Xunit.Abstractions;
 
-public class AttributesTests
+public class AttributesTests :
+    XunitLoggingBase
 {
     string PropertyNameToValueSeparator = "$%^%$";
     string PropertiesSeparator = "$@#@$";
@@ -132,5 +134,10 @@ public class AttributesTests
         var expected = $"{{T: \"IntCollection\", Count: 2, Collection: [1, 2, 3, 4, 5, 6{ListEnd}}}";
 
         Assert.Equal(expected, result);
+    }
+
+    public AttributesTests(ITestOutputHelper output) : 
+        base(output)
+    {
     }
 }
