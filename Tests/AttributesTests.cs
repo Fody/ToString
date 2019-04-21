@@ -17,19 +17,23 @@ public class AttributesTests :
     public Assembly PrepareAssembly(string name, AttributesConfiguration configuration)
     {
         var config = TestHelper.PrepareConfig(configuration);
-        var weavingTask = new ModuleWeaver()
+        var weavingTask = new ModuleWeaver
         {
             Config = config
 
         };
-        var testResult = weavingTask.ExecuteTestRun("AssemblyToProcess.dll");
+        var testResult = weavingTask.ExecuteTestRun("AssemblyToProcess.dll",assemblyName:name);
         return testResult.Assembly;
     }
 
     [Fact]
     public void NormalClassTest_ShouldUseCustomPropertyNameToValueSeparator()
     {
-        var assembly = PrepareAssembly("test1", new AttributesConfiguration { PropertyNameToValueSeparator = PropertyNameToValueSeparator });
+        var assembly = PrepareAssembly("test1",
+            new AttributesConfiguration
+            {
+                PropertyNameToValueSeparator = PropertyNameToValueSeparator
+            });
 
         var type = assembly.GetType("NormalClass");
         dynamic instance = Activator.CreateInstance(type);
@@ -48,7 +52,11 @@ public class AttributesTests :
     [Fact]
     public void NormalClassTest_ShouldUseCustomPropertiesSeparator()
     {
-        var assembly = PrepareAssembly("test2", new AttributesConfiguration { PropertiesSeparator = PropertiesSeparator });
+        var assembly = PrepareAssembly("test2",
+            new AttributesConfiguration
+            {
+                PropertiesSeparator = PropertiesSeparator
+            });
 
         var type = assembly.GetType("NormalClass");
         dynamic instance = Activator.CreateInstance(type);
@@ -67,7 +75,11 @@ public class AttributesTests :
     [Fact]
     public void NormalClassTest_ShouldNotWrapInBrackets()
     {
-        var assembly = PrepareAssembly("test3", new AttributesConfiguration { WrapWithBrackets = WrapWithBrackets });
+        var assembly = PrepareAssembly("test3",
+            new AttributesConfiguration
+            {
+                WrapWithBrackets = WrapWithBrackets
+            });
 
         var type = assembly.GetType("NormalClass");
         dynamic instance = Activator.CreateInstance(type);
@@ -86,7 +98,11 @@ public class AttributesTests :
     [Fact]
     public void NormalClassTest_ShouldNotWriteClassName()
     {
-        var assembly = PrepareAssembly("test4", new AttributesConfiguration { WriteTypeName = WriteTypeName });
+        var assembly = PrepareAssembly("test4",
+            new AttributesConfiguration
+            {
+                WriteTypeName = WriteTypeName
+            });
 
         var type = assembly.GetType("NormalClass");
         dynamic instance = Activator.CreateInstance(type);
@@ -105,11 +121,15 @@ public class AttributesTests :
     [Fact]
     public void NormalClassTest_ShouldStartListWithCustomSeparator()
     {
-        var assembly = PrepareAssembly("test5", new AttributesConfiguration { ListStart = ListStart });
+        var assembly = PrepareAssembly("test5",
+            new AttributesConfiguration
+            {
+                ListStart = ListStart
+            });
 
         var type = assembly.GetType("IntCollection");
         dynamic instance = Activator.CreateInstance(type);
-        instance.Collection = new[] { 1, 2, 3, 4, 5, 6 };
+        instance.Collection = new[] {1, 2, 3, 4, 5, 6};
         instance.Count = 2;
 
         var result = instance.ToString();
@@ -122,11 +142,15 @@ public class AttributesTests :
     [Fact]
     public void NormalClassTest_ShouldEndListWithCustomSeparator()
     {
-        var assembly = PrepareAssembly("test6", new AttributesConfiguration { ListEnd = ListEnd });
+        var assembly = PrepareAssembly("test6",
+            new AttributesConfiguration
+            {
+                ListEnd = ListEnd
+            });
 
         var type = assembly.GetType("IntCollection");
         dynamic instance = Activator.CreateInstance(type);
-        instance.Collection = new[] { 1, 2, 3, 4, 5, 6 };
+        instance.Collection = new[] {1, 2, 3, 4, 5, 6};
         instance.Count = 2;
 
         var result = instance.ToString();
@@ -136,7 +160,7 @@ public class AttributesTests :
         Assert.Equal(expected, result);
     }
 
-    public AttributesTests(ITestOutputHelper output) : 
+    public AttributesTests(ITestOutputHelper output) :
         base(output)
     {
     }
