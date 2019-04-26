@@ -6,6 +6,6 @@
     <Authors>Simon Cropp</Authors>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="FodyHelpers" Version="5.0.0" />
+    <PackageReference Include="FodyHelpers" Version="5.0.1" />
   </ItemGroup>
 </Project>
