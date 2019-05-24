@@ -9,7 +9,7 @@
     <PackageTags>ToString, Formatting, ILWeaving, Fody, Cecil</PackageTags>
     <PackageOutputPath>$(SolutionDir)nugets</PackageOutputPath>
     <PackageIconUrl>https://raw.githubusercontent.com/Fody/ToString/master/package_icon.png</PackageIconUrl>
-    <PackageProjectUrl>http://github.com/Fody/ToString</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/Fody/ToString</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
