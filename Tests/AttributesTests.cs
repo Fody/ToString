@@ -5,7 +5,7 @@ using Xunit;
 using Xunit.Abstractions;
 
 public class AttributesTests :
-    XunitLoggingBase
+    XunitApprovalBase
 {
     string PropertyNameToValueSeparator = "$%^%$";
     string PropertiesSeparator = "$@#@$";
