@@ -560,8 +560,7 @@ public class ModuleWeaver : BaseModuleWeaver
     bool ReadBoolValueFromConfig(string nodeName, bool defaultValue)
     {
         var node = Config?.Attributes().FirstOrDefault(a => a.Name.LocalName == nodeName);
-        bool nodeValue;
-        return node != null && bool.TryParse(node.Value, out nodeValue)
+        return node != null && bool.TryParse(node.Value, out var nodeValue)
             ? nodeValue
             : defaultValue;
     }

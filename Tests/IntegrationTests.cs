@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Fody;
+using VerifyXunit;
 using Xunit;
 using Xunit.Abstractions;
 
 public class IntegrationTests :
-    XunitApprovalBase
+    VerifyBase
 {
     static Assembly assembly;
     static TestResult testResult;
@@ -217,7 +218,7 @@ public class IntegrationTests :
         instance.Z = 4.5;
         instance.V = 'C';
 
-        dynamic array = Activator.CreateInstance(type.MakeArrayType(), new object[] { 2 });
+        dynamic array = Activator.CreateInstance(type.MakeArrayType(), 2);
         array[0] = instance;
         array[1] = null;
 
@@ -242,7 +243,7 @@ public class IntegrationTests :
         propInstance.D = 2;
         propInstance.C = 3;
 
-        dynamic array = Activator.CreateInstance(propType.MakeArrayType(), new object[] { 1 });
+        dynamic array = Activator.CreateInstance(propType.MakeArrayType(), 1);
         array[0] = propInstance;
 
         instance.B = array;
@@ -264,7 +265,7 @@ public class IntegrationTests :
         dynamic propInstance = Activator.CreateInstance(propType);
         propInstance.D = 3;
         propInstance.C = -4;
-        dynamic array = Activator.CreateInstance(propType.MakeArrayType(), new object[] { 1 });
+        dynamic array = Activator.CreateInstance(propType.MakeArrayType(), 1);
         array[0] = propInstance;
         instance.B = array;
 
@@ -286,7 +287,7 @@ public class IntegrationTests :
         dynamic propInstance = Activator.CreateInstance(propType);
         propInstance.D = 3;
         propInstance.C = 4;
-        dynamic array = Activator.CreateInstance(propType.MakeArrayType(), new object[] { 1 });
+        dynamic array = Activator.CreateInstance(propType.MakeArrayType(), 1);
         array[0] = propInstance;
         instance.B = array;
 
@@ -350,7 +351,7 @@ public class IntegrationTests :
     public void EnumWithValues()
     {
         var type = assembly.GetType("EnumClass");
-        dynamic instance = Activator.CreateInstance(type,new object[]{3,6});
+        dynamic instance = Activator.CreateInstance(type, 3, 6);
 
         var result = instance.ToString();
 
