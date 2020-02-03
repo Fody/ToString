@@ -37,17 +37,17 @@ public class ModuleWeaver : BaseModuleWeaver
 
     public override void Execute()
     {
-        var stringBuildType = FindType("System.Text.StringBuilder");
+        var stringBuildType = FindTypeDefinition("System.Text.StringBuilder");
         stringBuilderType = ModuleDefinition.ImportReference(stringBuildType);
         appendString = ModuleDefinition.ImportReference(stringBuildType.FindMethod("Append", "Object"));
-        var enumeratorType = FindType("System.Collections.IEnumerator");
+        var enumeratorType = FindTypeDefinition("System.Collections.IEnumerator");
         moveNext = ModuleDefinition.ImportReference(enumeratorType.FindMethod("MoveNext"));
         current = ModuleDefinition.ImportReference(enumeratorType.Properties.Single(x => x.Name == "Current").GetMethod);
-        var enumerableType = FindType("System.Collections.IEnumerable");
+        var enumerableType = FindTypeDefinition("System.Collections.IEnumerable");
         getEnumerator = ModuleDefinition.ImportReference(enumerableType.FindMethod("GetEnumerator"));
         formatMethod = ModuleDefinition.ImportReference(TypeSystem.StringDefinition.FindMethod("Format", "IFormatProvider", "String", "Object[]"));
 
-        var cultureInfoType = FindType("System.Globalization.CultureInfo");
+        var cultureInfoType = FindTypeDefinition("System.Globalization.CultureInfo");
         var invariantCulture = cultureInfoType.Properties.Single(x => x.Name == "InvariantCulture");
         getInvariantCulture = ModuleDefinition.ImportReference(invariantCulture.GetMethod);
 
