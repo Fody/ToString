@@ -5,8 +5,7 @@ using VerifyXunit;
 using Xunit;
 using Xunit.Abstractions;
 
-public class AttributesTests :
-    VerifyBase
+public class AttributesTests
 {
     string PropertyNameToValueSeparator = "$%^%$";
     string PropertiesSeparator = "$@#@$";

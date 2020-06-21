@@ -6,8 +6,7 @@ using VerifyXunit;
 using Xunit;
 using Xunit.Abstractions;
 
-public class IntegrationTests :
-    VerifyBase
+public class IntegrationTests
 {
     static Assembly assembly;
     static TestResult testResult;
