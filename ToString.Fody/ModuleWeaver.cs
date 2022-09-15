@@ -118,8 +118,8 @@ public class ModuleWeaver : BaseModuleWeaver
 
     void AddGenericParameterNames(TypeDefinition type, Collection<Instruction> ins)
     {
-        var typeType = ModuleDefinition.ImportReference(typeof(Type)).Resolve();
-        var memberInfoType = ModuleDefinition.ImportReference(typeof(System.Reflection.MemberInfo)).Resolve();
+        var typeType = ModuleDefinition.ImportReference(FindTypeDefinition(typeof(Type).FullName!)).Resolve();
+        var memberInfoType = ModuleDefinition.ImportReference(FindTypeDefinition(typeof(System.Reflection.MemberInfo).FullName!)).Resolve();
         var getTypeMethod = ModuleDefinition.ImportReference(TypeSystem.ObjectDefinition.FindMethod("GetType"));
         var getGenericArgumentsMethod = ModuleDefinition.ImportReference(typeType.FindMethod("GetGenericArguments"));
         var nameProperty = memberInfoType.Properties.Single(x => x.Name == "Name");
