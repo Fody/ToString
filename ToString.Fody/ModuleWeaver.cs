@@ -337,7 +337,7 @@ public class ModuleWeaver : BaseModuleWeaver
         ins.Add(Instruction.Create(OpCodes.Stloc_3));
     }
 
-    void While(
+    static void While(
         Collection<Instruction> ins,
         Action<Collection<Instruction>> condition,
         Action<Collection<Instruction>> body)
@@ -372,7 +372,7 @@ public class ModuleWeaver : BaseModuleWeaver
         ins.Add(Instruction.Create(OpCodes.Callvirt, toStringMethod));
     }
 
-    void If(Collection<Instruction> ins,
+    static void If(Collection<Instruction> ins,
         Action<Collection<Instruction>> condition,
         Action<Collection<Instruction>> thenStatement,
         Action<Collection<Instruction>> elseStatement)
@@ -511,7 +511,7 @@ public class ModuleWeaver : BaseModuleWeaver
 
     public override bool ShouldCleanReference => true;
 
-    void RemoveFodyAttributes(TypeDefinition type, PropertyDefinition[] allProperties)
+    static void RemoveFodyAttributes(TypeDefinition type, PropertyDefinition[] allProperties)
     {
         type.RemoveAttribute("ToStringAttribute");
         foreach (var property in allProperties)
@@ -520,7 +520,7 @@ public class ModuleWeaver : BaseModuleWeaver
         }
     }
 
-    IEnumerable<PropertyDefinition> RemoveIgnoredProperties(IEnumerable<PropertyDefinition> allProperties)
+    static IEnumerable<PropertyDefinition> RemoveIgnoredProperties(IEnumerable<PropertyDefinition> allProperties)
     {
         return allProperties
             .Where(x => x.CustomAttributes.All(y => y.AttributeType.Name != "IgnoreDuringToStringAttribute"));
@@ -529,7 +529,7 @@ public class ModuleWeaver : BaseModuleWeaver
     class PropertyNameEqualityComparer : IEqualityComparer<PropertyDefinition>
     {
         public bool Equals(PropertyDefinition x, PropertyDefinition y)
-            => (x == null && y == null) || (x?.Name == y?.Name);
+            => (x == null && y == null) || x?.Name == y?.Name;
 
         public int GetHashCode(PropertyDefinition obj)
         {
