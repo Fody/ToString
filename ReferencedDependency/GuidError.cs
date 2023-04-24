@@ -10,7 +10,7 @@ public class StatePrinter
 
 public class DomainObject
 {
-    static readonly StatePrinter StatePrinter = new StatePrinter();
+    static readonly StatePrinter StatePrinter = new();
 
     public override string ToString()
     {
