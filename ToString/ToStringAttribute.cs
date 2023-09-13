@@ -4,6 +4,4 @@ using System;
 /// Adds ToString method to class.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
-public sealed class ToStringAttribute : Attribute
-{
-}
+public sealed class ToStringAttribute : Attribute;

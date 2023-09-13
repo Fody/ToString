@@ -7,7 +7,7 @@ static class TypeDefinitionExtensions
 {
     public static MethodDefinition FindMethod(this TypeDefinition typeDefinition, string method, params string[] paramTypes)
     {
-        return typeDefinition.Methods.First(_ => _.Name == method && x.IsMatch(paramTypes));
+        return typeDefinition.Methods.First(_ => _.Name == method && _.IsMatch(paramTypes));
     }
 
     public static bool IsCollection(this TypeDefinition type)

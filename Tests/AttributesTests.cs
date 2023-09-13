@@ -27,8 +27,9 @@ public class AttributesTests
     [Fact]
     public void NormalClassTest_ShouldUseCustomPropertyNameToValueSeparator()
     {
-        var assembly = PrepareAssembly("test1",
-            new AttributesConfiguration
+        var assembly = PrepareAssembly(
+            "test1",
+            new()
             {
                 PropertyNameToValueSeparator = PropertyNameToValueSeparator
             });
@@ -51,7 +52,7 @@ public class AttributesTests
     public void NormalClassTest_ShouldUseCustomPropertiesSeparator()
     {
         var assembly = PrepareAssembly("test2",
-            new AttributesConfiguration
+            new()
             {
                 PropertiesSeparator = PropertiesSeparator
             });
@@ -74,7 +75,7 @@ public class AttributesTests
     public void NormalClassTest_ShouldNotWrapInBrackets()
     {
         var assembly = PrepareAssembly("test3",
-            new AttributesConfiguration
+            new()
             {
                 WrapWithBrackets = WrapWithBrackets
             });
@@ -97,7 +98,7 @@ public class AttributesTests
     public void NormalClassTest_ShouldNotWriteClassName()
     {
         var assembly = PrepareAssembly("test4",
-            new AttributesConfiguration
+            new()
             {
                 WriteTypeName = WriteTypeName
             });
@@ -120,7 +121,7 @@ public class AttributesTests
     public void NormalClassTest_ShouldStartListWithCustomSeparator()
     {
         var assembly = PrepareAssembly("test5",
-            new AttributesConfiguration
+            new()
             {
                 ListStart = ListStart
             });
@@ -141,7 +142,7 @@ public class AttributesTests
     public void NormalClassTest_ShouldEndListWithCustomSeparator()
     {
         var assembly = PrepareAssembly("test6",
-            new AttributesConfiguration
+            new()
             {
                 ListEnd = ListEnd
             });

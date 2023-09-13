@@ -11,7 +11,7 @@ public static class PropertyDefinitionExtensions
         }
 
         var genericInstanceType = property.DeclaringType.GetGenericInstanceType(targetType);
-        return new MethodReference(method.Name, method.ReturnType)
+        return new(method.Name, method.ReturnType)
         {
             DeclaringType = genericInstanceType,
             HasThis = true

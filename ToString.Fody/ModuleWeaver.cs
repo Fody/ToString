@@ -63,7 +63,7 @@ public class ModuleWeaver : BaseModuleWeaver
 
         var method = new MethodDefinition("ToString", methodAttributes, TypeSystem.StringReference);
         var variables = method.Body.Variables;
-        variables.Add(new VariableDefinition(new ArrayType(TypeSystem.ObjectReference)));
+        variables.Add(new(new ArrayType(TypeSystem.ObjectReference)));
         var allProperties = type.GetProperties().Where(x => !x.HasParameters).ToArray();
         var properties = RemoveIgnoredProperties(allProperties).Distinct(PropertyNameEqualityComparer.Default).ToArray();
 
@@ -76,14 +76,14 @@ public class ModuleWeaver : BaseModuleWeaver
         var hasCollections = properties.Any(x => !x.PropertyType.IsGenericParameter && x.PropertyType.Resolve().IsCollection());
         if (hasCollections)
         {
-            variables.Add(new VariableDefinition(stringBuilderType));
+            variables.Add(new(stringBuilderType));
 
             var enumeratorType = ModuleDefinition.ImportReference(typeof(IEnumerator));
-            variables.Add(new VariableDefinition(enumeratorType));
+            variables.Add(new(enumeratorType));
 
-            variables.Add(new VariableDefinition(TypeSystem.BooleanReference));
+            variables.Add(new(TypeSystem.BooleanReference));
 
-            variables.Add(new VariableDefinition(new ArrayType(TypeSystem.ObjectReference)));
+            variables.Add(new(new ArrayType(TypeSystem.ObjectReference)));
         }
 
         var genericOffset = !type.HasGenericParameters ? 0 : type.GenericParameters.Count;
@@ -105,7 +105,8 @@ public class ModuleWeaver : BaseModuleWeaver
         AddEndCode(body);
         body.OptimizeMacros();
 
-        var toRemove = type.Methods.FirstOrDefault(_ => _.Name == method.Name && x.Parameters.Count == 0);
+        var toRemove = type.Methods.FirstOrDefault(_ => _.Name == method.Name &&
+                                                        _.Parameters.Count == 0);
         if (toRemove != null)
         {
             type.Methods.Remove(toRemove);
@@ -153,8 +154,8 @@ public class ModuleWeaver : BaseModuleWeaver
         var version = typeof(ModuleWeaver).Assembly.GetName().Version.ToString();
 
         var generatedAttribute = new CustomAttribute(generatedConstructor);
-        generatedAttribute.ConstructorArguments.Add(new CustomAttributeArgument(TypeSystem.StringReference, "Fody.ToString"));
-        generatedAttribute.ConstructorArguments.Add(new CustomAttributeArgument(TypeSystem.StringReference, version));
+        generatedAttribute.ConstructorArguments.Add(new(TypeSystem.StringReference, "Fody.ToString"));
+        generatedAttribute.ConstructorArguments.Add(new(TypeSystem.StringReference, version));
         method.CustomAttributes.Add(generatedAttribute);
 
         var debuggerConstructor = ModuleDefinition.ImportReference(typeof(DebuggerNonUserCodeAttribute).GetConstructor(Type.EmptyTypes));
@@ -496,11 +497,7 @@ public class ModuleWeaver : BaseModuleWeaver
     static bool HaveToAddQuotes(TypeReference type)
     {
         var name = type.FullName;
-        if (name == "System.String" ||
-            name == "System.Char" ||
-            name == "System.DateTime" ||
-            name == "System.TimeSpan" ||
-            name == "System.Guid")
+        if (name is "System.String" or "System.Char" or "System.DateTime" or "System.TimeSpan" or "System.Guid")
         {
             return true;
         }
@@ -541,7 +538,7 @@ public class ModuleWeaver : BaseModuleWeaver
             return obj.Name.GetHashCode();
         }
 
-        public static readonly PropertyNameEqualityComparer Default = new PropertyNameEqualityComparer();
+        public static readonly PropertyNameEqualityComparer Default = new();
     }
 
     string PropertyNameToValueSeparator => ReadStringValueFromConfig("PropertyNameToValueSeparator", ": ");

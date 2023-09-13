@@ -1,4 +1,2 @@
 ﻿[ToString]
-public class ReferenceObject : NameObject
-{
-}
+public class ReferenceObject : NameObject;
