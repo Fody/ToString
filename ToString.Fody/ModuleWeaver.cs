@@ -24,7 +24,7 @@ public class ModuleWeaver : BaseModuleWeaver
     public IEnumerable<TypeDefinition> GetMatchingTypes()
     {
         return ModuleDefinition.GetTypes()
-            .Where(x => x.CustomAttributes.Any(a => a.AttributeType.Name == "ToStringAttribute"));
+            .Where(_ => _.CustomAttributes.Any(a => a.AttributeType.Name == "ToStringAttribute"));
     }
 
     public override IEnumerable<string> GetAssembliesForScanning()
@@ -42,13 +42,13 @@ public class ModuleWeaver : BaseModuleWeaver
         appendString = ModuleDefinition.ImportReference(stringBuildType.FindMethod("Append", "Object"));
         var enumeratorType = FindTypeDefinition("System.Collections.IEnumerator");
         moveNext = ModuleDefinition.ImportReference(enumeratorType.FindMethod("MoveNext"));
-        current = ModuleDefinition.ImportReference(enumeratorType.Properties.Single(x => x.Name == "Current").GetMethod);
+        current = ModuleDefinition.ImportReference(enumeratorType.Properties.Single(_ => _.Name == "Current").GetMethod);
         var enumerableType = FindTypeDefinition("System.Collections.IEnumerable");
         getEnumerator = ModuleDefinition.ImportReference(enumerableType.FindMethod("GetEnumerator"));
         formatMethod = ModuleDefinition.ImportReference(TypeSystem.StringDefinition.FindMethod("Format", "IFormatProvider", "String", "Object[]"));
 
         var cultureInfoType = FindTypeDefinition("System.Globalization.CultureInfo");
-        var invariantCulture = cultureInfoType.Properties.Single(x => x.Name == "InvariantCulture");
+        var invariantCulture = cultureInfoType.Properties.Single(_ => _.Name == "InvariantCulture");
         getInvariantCulture = ModuleDefinition.ImportReference(invariantCulture.GetMethod);
 
         foreach (var type in GetMatchingTypes())
@@ -105,7 +105,7 @@ public class ModuleWeaver : BaseModuleWeaver
         AddEndCode(body);
         body.OptimizeMacros();
 
-        var toRemove = type.Methods.FirstOrDefault(x => x.Name == method.Name && x.Parameters.Count == 0);
+        var toRemove = type.Methods.FirstOrDefault(_ => _.Name == method.Name && x.Parameters.Count == 0);
         if (toRemove != null)
         {
             type.Methods.Remove(toRemove);
@@ -122,7 +122,7 @@ public class ModuleWeaver : BaseModuleWeaver
         var memberInfoType = ModuleDefinition.ImportReference(FindTypeDefinition(typeof(System.Reflection.MemberInfo).FullName!)).Resolve();
         var getTypeMethod = ModuleDefinition.ImportReference(TypeSystem.ObjectDefinition.FindMethod("GetType"));
         var getGenericArgumentsMethod = ModuleDefinition.ImportReference(typeType.FindMethod("GetGenericArguments"));
-        var nameProperty = memberInfoType.Properties.Single(x => x.Name == "Name");
+        var nameProperty = memberInfoType.Properties.Single(_ => _.Name == "Name");
         var nameGet = ModuleDefinition.ImportReference(nameProperty.GetMethod);
 
         for (var i = 0; i < type.GenericParameters.Count; i++)
@@ -275,7 +275,7 @@ public class ModuleWeaver : BaseModuleWeaver
 
                                         t.Add(Instruction.Create(OpCodes.Call, formatMethod));
                                     },
-                                    e => e.Add(Instruction.Create(OpCodes.Ldstr, "null")));
+                                    _ => _.Add(Instruction.Create(OpCodes.Ldstr, "null")));
                                 ins.Add(Instruction.Create(OpCodes.Callvirt, appendString));
                                 ins.Add(Instruction.Create(OpCodes.Pop));
                             });
@@ -397,7 +397,7 @@ public class ModuleWeaver : BaseModuleWeaver
     void AppendSeparator(Collection<Instruction> ins)
     {
         If(ins,
-            c => c.Add(Instruction.Create(OpCodes.Ldloc_3)),
+            _ => _.Add(Instruction.Create(OpCodes.Ldloc_3)),
             t => AppendString(t, PropertiesSeparator),
             e =>
             {
@@ -523,7 +523,7 @@ public class ModuleWeaver : BaseModuleWeaver
     static IEnumerable<PropertyDefinition> RemoveIgnoredProperties(IEnumerable<PropertyDefinition> allProperties)
     {
         return allProperties
-            .Where(x => x.CustomAttributes.All(y => y.AttributeType.Name != "IgnoreDuringToStringAttribute"));
+            .Where(_ => _.CustomAttributes.All(y => y.AttributeType.Name != "IgnoreDuringToStringAttribute"));
     }
 
     class PropertyNameEqualityComparer : IEqualityComparer<PropertyDefinition>

@@ -8,7 +8,7 @@ public static class ICustomAttributeProviderExtensions
     {
         var customAttributes = definition.CustomAttributes;
 
-        var attribute = customAttributes.FirstOrDefault(x => x.AttributeType.Name == name);
+        var attribute = customAttributes.FirstOrDefault(_ => _.AttributeType.Name == name);
 
         if (attribute != null)
         {
