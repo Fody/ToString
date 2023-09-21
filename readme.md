@@ -5,6 +5,8 @@
 
 Generates ToString method from public properties for class decorated with a `[ToString]` Attribute.
 
+**See [Milestones](../../milestones?state=closed) for release notes.**
+
 
 ### This is an add-in for [Fody](https://github.com/Fody/Home/)
 
