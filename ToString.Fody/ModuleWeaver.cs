@@ -503,7 +503,7 @@ public class ModuleWeaver : BaseModuleWeaver
         }
 
         var resolved = type.Resolve();
-        return resolved != null && resolved.IsEnum;
+        return resolved is {IsEnum: true};
     }
 
     public override bool ShouldCleanReference => true;
