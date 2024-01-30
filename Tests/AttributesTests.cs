@@ -15,12 +15,12 @@ public class AttributesTests
     public Assembly PrepareAssembly(string name, AttributesConfiguration configuration)
     {
         var config = TestHelper.PrepareConfig(configuration);
-        var weavingTask = new ModuleWeaver
+        var weaver = new ModuleWeaver
         {
             Config = config
 
         };
-        var testResult = weavingTask.ExecuteTestRun("AssemblyToProcess.dll",assemblyName:name);
+        var testResult = weaver.ExecuteTestRun("AssemblyToProcess.dll",assemblyName:name);
         return testResult.Assembly;
     }
 

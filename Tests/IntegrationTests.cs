@@ -11,8 +11,8 @@ public class IntegrationTests
 
     static IntegrationTests()
     {
-        var weavingTask = new ModuleWeaver();
-        testResult = weavingTask.ExecuteTestRun("AssemblyToProcess.dll");
+        var weaver = new ModuleWeaver();
+        testResult = weaver.ExecuteTestRun("AssemblyToProcess.dll");
         assembly = testResult.Assembly;
     }
 
