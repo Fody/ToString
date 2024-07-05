@@ -145,11 +145,7 @@ public class ModuleWeaver : BaseModuleWeaver
     void AddMethodAttributes(MethodDefinition method)
     {
         var generatedConstructor = ModuleDefinition.ImportReference(typeof(GeneratedCodeAttribute)
-            .GetConstructor(new[]
-            {
-                typeof(string),
-                typeof(string)
-            }));
+            .GetConstructor([typeof(string), typeof(string)]));
 
         var version = typeof(ModuleWeaver).Assembly.GetName().Version.ToString();
 
@@ -321,7 +317,7 @@ public class ModuleWeaver : BaseModuleWeaver
 
     void NewStringBuilder(Collection<Instruction> ins)
     {
-        var stringBuilderConstructor = ModuleDefinition.ImportReference(typeof(StringBuilder).GetConstructor(new Type[] { }));
+        var stringBuilderConstructor = ModuleDefinition.ImportReference(typeof(StringBuilder).GetConstructor([]));
         ins.Add(Instruction.Create(OpCodes.Newobj, stringBuilderConstructor));
         ins.Add(Instruction.Create(OpCodes.Stloc_1));
     }
