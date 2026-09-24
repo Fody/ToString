@@ -1,9 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Fody;
-using Xunit;
+using TestResult = Fody.TestResult;
 
+// weaving runs share the AssemblyToProcess files and the weaver test output folders
+[NotInParallel]
 public class IntegrationTests
 {
     static Assembly assembly;
@@ -16,8 +18,8 @@ public class IntegrationTests
         assembly = testResult.Assembly;
     }
 
-    [Fact]
-    public void NormalClassTest()
+    [Test]
+    public async Task NormalClassTest()
     {
         var instance = testResult.GetInstance("NormalClass");
         instance.X = 1;
@@ -25,26 +27,26 @@ public class IntegrationTests
         instance.Z = 4.5;
         instance.V = 'C';
 
-        var result  = instance.ToString();
+        string result = instance.ToString();
 
-        Assert.Equal("{T: \"NormalClass\", X: 1, Y: \"2\", Z: 4.5, V: \"C\"}", result);
+        await Assert.That(result).IsEqualTo("{T: \"NormalClass\", X: 1, Y: \"2\", Z: 4.5, V: \"C\"}");
     }
 
-    [Fact]
-    public void NormalStructTest()
+    [Test]
+    public async Task NormalStructTest()
     {
         var instance = testResult.GetInstance("NormalStruct");
         instance.X = 1;
         instance.Y = "2";
         instance.Z = 4.5;
 
-        var result = instance.ToString();
+        string result = instance.ToString();
 
-        Assert.Equal("{T: \"NormalStruct\", X: 1, Y: \"2\", Z: 4.5}", result);
+        await Assert.That(result).IsEqualTo("{T: \"NormalStruct\", X: 1, Y: \"2\", Z: 4.5}");
     }
 
-    [Fact]
-    public void NestedClassTest()
+    [Test]
+    public async Task NestedClassTest()
     {
         var normalInstance = testResult.GetInstance("NormalClass");
         normalInstance.X = 1;
@@ -57,13 +59,13 @@ public class IntegrationTests
         nestedInstance.C = 12.25;
         nestedInstance.D = normalInstance;
 
-        var result = nestedInstance.ToString();
+        string result = nestedInstance.ToString();
 
-        Assert.Equal("{T: \"NestedClass\", A: 10, B: \"11\", C: 12.25, D: {T: \"NormalClass\", X: 1, Y: \"2\", Z: 4.5, V: \"V\"}}", result);
+        await Assert.That(result).IsEqualTo("{T: \"NestedClass\", A: 10, B: \"11\", C: 12.25, D: {T: \"NormalClass\", X: 1, Y: \"2\", Z: 4.5, V: \"V\"}}");
     }
 
-    [Fact]
-    public void ClassWithIgnoredPropertiesTest()
+    [Test]
+    public async Task ClassWithIgnoredPropertiesTest()
     {
         var type = assembly.GetType("ClassWithIgnoredProperties");
         dynamic instance = Activator.CreateInstance(type);
@@ -71,13 +73,13 @@ public class IntegrationTests
         instance.Password = "pass";
         instance.Age = 18;
 
-        var result = instance.ToString();
+        string result = instance.ToString();
 
-        Assert.Equal("{T: \"ClassWithIgnoredProperties\", Username: \"user\", Age: 18}", result);
+        await Assert.That(result).IsEqualTo("{T: \"ClassWithIgnoredProperties\", Username: \"user\", Age: 18}");
     }
 
-    [Fact]
-    public void NullTest()
+    [Test]
+    public async Task NullTest()
     {
         var nestedType = assembly.GetType("NestedClass");
         dynamic nestedInstance = Activator.CreateInstance(nestedType);
@@ -86,26 +88,26 @@ public class IntegrationTests
         nestedInstance.C = 12.25;
         nestedInstance.D = null;
 
-        var result = nestedInstance.ToString();
+        string result = nestedInstance.ToString();
 
-        Assert.Equal("{T: \"NestedClass\", A: 10, B: \"11\", C: 12.25, D: null}", result);
+        await Assert.That(result).IsEqualTo("{T: \"NestedClass\", A: 10, B: \"11\", C: 12.25, D: null}");
     }
 
-    [Fact]
-    public void ClassWithParentInAnotherAssembly()
+    [Test]
+    public async Task ClassWithParentInAnotherAssembly()
     {
         var derivedType = assembly.GetType("Child");
         dynamic instance = Activator.CreateInstance(derivedType);
         instance.InParent = 10;
         instance.InChild = 5;
 
-        var result = instance.ToString();
+        string result = instance.ToString();
 
-        Assert.Equal(result, "{T: \"Child\", InChild: 5, InParent: 10}");
+        await Assert.That(result).IsEqualTo("{T: \"Child\", InChild: 5, InParent: 10}");
     }
 
-    [Fact]
-    public void ComplexClassWithParentInAnotherAssembly()
+    [Test]
+    public async Task ComplexClassWithParentInAnotherAssembly()
     {
         var derivedType = assembly.GetType("ComplexChild");
         dynamic instance = Activator.CreateInstance(derivedType);
@@ -116,93 +118,93 @@ public class IntegrationTests
         instance.InParentText = "5";
         instance.InParentCollection  = new[] {6};
 
-        var result = instance.ToString();
+        string result = instance.ToString();
 
-        Assert.Equal(result, "{T: \"ComplexChild\", InChildNumber: 1, InChildText: \"2\", InChildCollection: [3], InParentNumber: 4, InParentText: \"5\", InParentCollection: [6]}");
+        await Assert.That(result).IsEqualTo("{T: \"ComplexChild\", InChildNumber: 1, InChildText: \"2\", InChildCollection: [3], InParentNumber: 4, InParentText: \"5\", InParentCollection: [6]}");
     }
 
-    [Fact]
-    public void ClassWithGenericParentInAnotherAssembly()
+    [Test]
+    public async Task ClassWithGenericParentInAnotherAssembly()
     {
         var derivedType = assembly.GetType("GenericChild");
         dynamic instance = Activator.CreateInstance(derivedType);
         instance.InChild = "5";
         instance.GenericInParent = 6;
 
-        var result = instance.ToString();
+        string result = instance.ToString();
 
-        Assert.Equal(result, "{T: \"GenericChild\", InChild: \"5\", GenericInParent: 6}");
+        await Assert.That(result).IsEqualTo("{T: \"GenericChild\", InChild: \"5\", GenericInParent: 6}");
     }
 
-    [Fact]
-    public void GuidErrorTest()
+    [Test]
+    public async Task GuidErrorTest()
     {
         var type = assembly.GetType( "ReferenceObject" );
         dynamic instance = Activator.CreateInstance( type );
         instance.Id = Guid.Parse( "{f6ab1abe-5811-40e9-8154-35776d2e5106}" );
         instance.Name = "Test";
 
-        var result = instance.ToString();
+        string result = instance.ToString();
 
-        Assert.Equal( "{T: \"ReferenceObject\", Name: \"Test\", Id: \"f6ab1abe-5811-40e9-8154-35776d2e5106\"}", result );
+        await Assert.That(result).IsEqualTo("{T: \"ReferenceObject\", Name: \"Test\", Id: \"f6ab1abe-5811-40e9-8154-35776d2e5106\"}");
     }
 
     #region Collections
 
-    [Fact]
-    public void IntArray()
+    [Test]
+    public async Task IntArray()
     {
         var type = assembly.GetType("IntCollection");
         dynamic nestedInstance = Activator.CreateInstance(type);
         nestedInstance.Collection = new[] { 1, 2, 3, 4, 5, 6 };
         nestedInstance.Count = 2;
 
-        var result = nestedInstance.ToString();
+        string result = nestedInstance.ToString();
 
-        Assert.Equal("{T: \"IntCollection\", Count: 2, Collection: [1, 2, 3, 4, 5, 6]}", result);
+        await Assert.That(result).IsEqualTo("{T: \"IntCollection\", Count: 2, Collection: [1, 2, 3, 4, 5, 6]}");
     }
 
-    [Fact]
-    public void StringArray()
+    [Test]
+    public async Task StringArray()
     {
         var type = assembly.GetType("StringCollection");
         dynamic nestedInstance = Activator.CreateInstance(type);
         nestedInstance.Collection = new List<string> { "foo", "bar" };
         nestedInstance.Count = 2;
 
-        var result = nestedInstance.ToString();
+        string result = nestedInstance.ToString();
 
-        Assert.Equal("{T: \"StringCollection\", Count: 2, Collection: [\"foo\", \"bar\"]}", result);
+        await Assert.That(result).IsEqualTo("{T: \"StringCollection\", Count: 2, Collection: [\"foo\", \"bar\"]}");
     }
 
-    [Fact]
-    public void EmptyArray()
+    [Test]
+    public async Task EmptyArray()
     {
         var type = assembly.GetType("IntCollection");
         dynamic nestedInstance = Activator.CreateInstance(type);
         nestedInstance.Collection = new int[] {};
         nestedInstance.Count = 0;
 
-        var result = nestedInstance.ToString();
+        string result = nestedInstance.ToString();
 
-        Assert.Equal("{T: \"IntCollection\", Count: 0, Collection: []}", result);
+        await Assert.That(result).IsEqualTo("{T: \"IntCollection\", Count: 0, Collection: []}");
     }
 
-    [Fact]
-    public void NullArray()
+    [Test]
+    public async Task NullArray()
     {
         var type = assembly.GetType("IntCollection");
         dynamic nestedInstance = Activator.CreateInstance(type);
         nestedInstance.Collection = null;
         nestedInstance.Count = 0;
 
-        var result = nestedInstance.ToString();
+        string result = nestedInstance.ToString();
 
-        Assert.Equal("{T: \"IntCollection\", Count: 0, Collection: null}", result);
+        await Assert.That(result).IsEqualTo("{T: \"IntCollection\", Count: 0, Collection: null}");
     }
 
-    [Fact]
-    public void ObjectArray()
+    [Test]
+    public async Task ObjectArray()
     {
         var arrayType = assembly.GetType("ObjectCollection");
         dynamic arrayInstance = Activator.CreateInstance(arrayType);
@@ -221,13 +223,13 @@ public class IntegrationTests
 
         arrayInstance.Collection = array;
 
-        var result = arrayInstance.ToString();
+        string result = arrayInstance.ToString();
 
-        Assert.Equal("{T: \"ObjectCollection\", Count: 2, Collection: [{T: \"NormalClass\", X: 1, Y: \"2\", Z: 4.5, V: \"C\"}, null]}", result);
+        await Assert.That(result).IsEqualTo("{T: \"ObjectCollection\", Count: 2, Collection: [{T: \"NormalClass\", X: 1, Y: \"2\", Z: 4.5, V: \"C\"}, null]}");
     }
 
-    [Fact]
-    public void GenericClassWithCollection()
+    [Test]
+    public async Task GenericClassWithCollection()
     {
         var genericClassType = assembly.GetType("GenericClass`1");
         var propType = assembly.GetType("GenericClassNormalClass");
@@ -245,13 +247,13 @@ public class IntegrationTests
 
         instance.B = array;
 
-        var result = instance.ToString();
+        string result = instance.ToString();
 
-        Assert.Equal("{T: \"GenericClass<GenericClassNormalClass>\", A: 1, B: [{T: \"GenericClassNormalClass\", D: 2, C: 3}]}", result);
+        await Assert.That(result).IsEqualTo("{T: \"GenericClass<GenericClassNormalClass>\", A: 1, B: [{T: \"GenericClassNormalClass\", D: 2, C: 3}]}");
     }
 
-    [Fact]
-    public void WithoutGenericParameter()
+    [Test]
+    public async Task WithoutGenericParameter()
     {
         var withoutGenericParameterType = assembly.GetType("WithoutGenericParameter");
         var propType = assembly.GetType("GenericClassNormalClass");
@@ -266,13 +268,13 @@ public class IntegrationTests
         array[0] = propInstance;
         instance.B = array;
 
-        var result = instance.ToString();
+        string result = instance.ToString();
 
-        Assert.Equal("{T: \"WithoutGenericParameter\", Z: 12, A: 1, B: [{T: \"GenericClassNormalClass\", D: 3, C: -4}]}", result);
+        await Assert.That(result).IsEqualTo("{T: \"WithoutGenericParameter\", Z: 12, A: 1, B: [{T: \"GenericClassNormalClass\", D: 3, C: -4}]}");
     }
 
-    [Fact]
-    public void WithGenericParameter()
+    [Test]
+    public async Task WithGenericParameter()
     {
         var withGenericParameterType = assembly.GetType("WithGenericParameter`1");
         var propType = assembly.GetType("GenericClassNormalClass");
@@ -288,13 +290,13 @@ public class IntegrationTests
         array[0] = propInstance;
         instance.B = array;
 
-        var result = instance.ToString();
+        string result = instance.ToString();
 
-        Assert.Equal("{T: \"WithGenericParameter<GenericClassNormalClass>\", X: 12, A: 1, B: [{T: \"GenericClassNormalClass\", D: 3, C: 4}]}", result);
+        await Assert.That(result).IsEqualTo("{T: \"WithGenericParameter<GenericClassNormalClass>\", X: 12, A: 1, B: [{T: \"GenericClassNormalClass\", D: 3, C: 4}]}");
     }
 
-    [Fact]
-    public void WithGenericProperty()
+    [Test]
+    public async Task WithGenericProperty()
     {
         var withGenericPropertyType = assembly.GetType("WithPropertyOfGenericType`1");
         var propType = assembly.GetType("GenericClassNormalClass");
@@ -306,13 +308,13 @@ public class IntegrationTests
         propInstance.C = 1;
         propInstance.D = 3;
 
-        var result = instance.ToString();
+        string result = instance.ToString();
 
-        Assert.Equal(result, "{T: \"WithPropertyOfGenericType<GenericClassNormalClass>\", GP: {T: \"GenericClassNormalClass\", D: 3, C: 1}}");
+        await Assert.That(result).IsEqualTo("{T: \"WithPropertyOfGenericType<GenericClassNormalClass>\", GP: {T: \"GenericClassNormalClass\", D: 3, C: 1}}");
     }
 
-    [Fact]
-    public void WithInheritedGenericProperty()
+    [Test]
+    public async Task WithInheritedGenericProperty()
     {
         var withGenericPropertyType = assembly.GetType("WithInheritedPropertyOfGenericType");
 
@@ -324,99 +326,99 @@ public class IntegrationTests
         propInstance.D = 3;
         instance.X = 6;
 
-        var result = instance.ToString();
+        string result = instance.ToString();
 
-        Assert.Equal(result, "{T: \"WithInheritedPropertyOfGenericType\", X: 6, GP: {T: \"GenericClassNormalClass\", D: 3, C: 1}}");
+        await Assert.That(result).IsEqualTo("{T: \"WithInheritedPropertyOfGenericType\", X: 6, GP: {T: \"GenericClassNormalClass\", D: 3, C: 1}}");
     }
 
     #endregion
 
     #region enums
 
-    [Fact]
-    public void EmptyEnum()
+    [Test]
+    public async Task EmptyEnum()
     {
         var type = assembly.GetType("EnumClass");
         dynamic instance = Activator.CreateInstance(type);
 
-        var result = instance.ToString();
+        string result = instance.ToString();
 
-        Assert.Equal("{T: \"EnumClass\", NormalEnum: \"A\", FlagsEnum: \"G\"}", result);
+        await Assert.That(result).IsEqualTo("{T: \"EnumClass\", NormalEnum: \"A\", FlagsEnum: \"G\"}");
     }
 
-    [Fact]
-    public void EnumWithValues()
+    [Test]
+    public async Task EnumWithValues()
     {
         var type = assembly.GetType("EnumClass");
         dynamic instance = Activator.CreateInstance(type, 3, 6);
 
-        var result = instance.ToString();
+        string result = instance.ToString();
 
-        Assert.Equal("{T: \"EnumClass\", NormalEnum: \"D\", FlagsEnum: \"I, J\"}", result);
+        await Assert.That(result).IsEqualTo("{T: \"EnumClass\", NormalEnum: \"D\", FlagsEnum: \"I, J\"}");
     }
 
 
     #endregion
 
-    [Fact]
-    public void TimeClassTest()
+    [Test]
+    public async Task TimeClassTest()
     {
         var type = assembly.GetType( "TimeClass" );
         dynamic instance = Activator.CreateInstance( type );
         instance.X = new DateTime(1988, 05, 23, 10, 30, 0, DateTimeKind.Utc);
         instance.Y = new TimeSpan(1, 2, 3, 4);
 
-        var result = instance.ToString();
+        string result = instance.ToString();
 
-        Assert.Equal( "{T: \"TimeClass\", X: \"1988-05-23T10:30:00.0000000Z\", Y: \"1.02:03:04\"}", result );
+        await Assert.That(result).IsEqualTo("{T: \"TimeClass\", X: \"1988-05-23T10:30:00.0000000Z\", Y: \"1.02:03:04\"}");
     }
 
-    [Fact]
-    public void IndexerTest()
+    [Test]
+    public async Task IndexerTest()
     {
         var type = assembly.GetType("ClassWithIndexer");
         dynamic instance = Activator.CreateInstance(type);
         instance.X = 1;
         instance.Y = 2;
 
-        var result = instance.ToString();
+        string result = instance.ToString();
 
-        Assert.Equal("{T: \"ClassWithIndexer\", X: 1, Y: 2}", result);
+        await Assert.That(result).IsEqualTo("{T: \"ClassWithIndexer\", X: 1, Y: 2}");
     }
 
-    [Fact]
-    public void RemoveToStringMethod()
+    [Test]
+    public async Task RemoveToStringMethod()
     {
         var type = assembly.GetType("ClassWithToString");
         dynamic instance = Activator.CreateInstance(type);
         instance.X = 1;
         instance.Y = 2;
 
-        var result = instance.ToString();
+        string result = instance.ToString();
 
-        Assert.Equal("{T: \"ClassWithToString\", X: 1, Y: 2}", result);
+        await Assert.That(result).IsEqualTo("{T: \"ClassWithToString\", X: 1, Y: 2}");
     }
 
-    [Fact]
-    public void GuidClassTest()
+    [Test]
+    public async Task GuidClassTest()
     {
         var type = assembly.GetType( "GuidClass" );
         dynamic instance = Activator.CreateInstance( type );
         instance.X = 1;
         instance.Y = new Guid(1,2,3,4,5,6,7,8,9,10,11);
 
-        var result = instance.ToString();
+        string result = instance.ToString();
 
-        Assert.Equal( "{T: \"GuidClass\", X: 1, Y: \"00000001-0002-0003-0405-060708090a0b\"}", result );
+        await Assert.That(result).IsEqualTo("{T: \"GuidClass\", X: 1, Y: \"00000001-0002-0003-0405-060708090a0b\"}");
     }
 
-    [Fact]
-    public void ClassWithDerivedPropertiesTest()
+    [Test]
+    public async Task ClassWithDerivedPropertiesTest()
     {
         var type = assembly.GetType("ClassWithDerivedProperties");
         dynamic instance = Activator.CreateInstance(type);
-        var result = instance.ToString();
+        string result = instance.ToString();
 
-        Assert.Equal("{T: \"ClassWithDerivedProperties\", NormalProperty: \"New\", INormalProperty.NormalProperty: \"Interface\", VirtualProperty: \"Override Virtual\", AbstractProperty: \"Override Abstract\"}", result);
+        await Assert.That(result).IsEqualTo("{T: \"ClassWithDerivedProperties\", NormalProperty: \"New\", INormalProperty.NormalProperty: \"Interface\", VirtualProperty: \"Override Virtual\", AbstractProperty: \"Override Abstract\"}");
     }
 }

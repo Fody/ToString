@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Reflection;
 using Fody;
-using Xunit;
 
+// weaving runs share the AssemblyToProcess files and the weaver test output folders
+[NotInParallel]
 public class AttributesTests
 {
     string PropertyNameToValueSeparator = "$%^%$";
@@ -12,7 +13,7 @@ public class AttributesTests
     string ListStart = "---[[[";
     string ListEnd = "]]]---";
 
-    public Assembly PrepareAssembly(string name, AttributesConfiguration configuration)
+    Assembly PrepareAssembly(string name, AttributesConfiguration configuration)
     {
         var config = TestHelper.PrepareConfig(configuration);
         var weaver = new ModuleWeaver
@@ -24,8 +25,8 @@ public class AttributesTests
         return testResult.Assembly;
     }
 
-    [Fact]
-    public void NormalClassTest_ShouldUseCustomPropertyNameToValueSeparator()
+    [Test]
+    public async Task NormalClassTest_ShouldUseCustomPropertyNameToValueSeparator()
     {
         var assembly = PrepareAssembly(
             "test1",
@@ -41,15 +42,13 @@ public class AttributesTests
         instance.Z = 4.5;
         instance.V = 'C';
 
-        var result = instance.ToString();
+        string result = instance.ToString();
 
-        Assert.Equal(
-            string.Format("{{T{0}\"NormalClass\", X{0}1, Y{0}\"2\", Z{0}4.5, V{0}\"C\"}}", PropertyNameToValueSeparator),
-            result);
+        await Assert.That(result).IsEqualTo(string.Format("{{T{0}\"NormalClass\", X{0}1, Y{0}\"2\", Z{0}4.5, V{0}\"C\"}}", PropertyNameToValueSeparator));
     }
 
-    [Fact]
-    public void NormalClassTest_ShouldUseCustomPropertiesSeparator()
+    [Test]
+    public async Task NormalClassTest_ShouldUseCustomPropertiesSeparator()
     {
         var assembly = PrepareAssembly("test2",
             new()
@@ -64,15 +63,13 @@ public class AttributesTests
         instance.Z = 4.5;
         instance.V = 'C';
 
-        var result = instance.ToString();
+        string result = instance.ToString();
 
-        Assert.Equal(
-            string.Format("{{T: \"NormalClass\"{0}X: 1{0}Y: \"2\"{0}Z: 4.5{0}V: \"C\"}}", PropertiesSeparator),
-            result);
+        await Assert.That(result).IsEqualTo(string.Format("{{T: \"NormalClass\"{0}X: 1{0}Y: \"2\"{0}Z: 4.5{0}V: \"C\"}}", PropertiesSeparator));
     }
 
-    [Fact]
-    public void NormalClassTest_ShouldNotWrapInBrackets()
+    [Test]
+    public async Task NormalClassTest_ShouldNotWrapInBrackets()
     {
         var assembly = PrepareAssembly("test3",
             new()
@@ -87,15 +84,13 @@ public class AttributesTests
         instance.Z = 4.5;
         instance.V = 'C';
 
-        var result = instance.ToString();
+        string result = instance.ToString();
 
-        Assert.Equal(
-            "T: \"NormalClass\", X: 1, Y: \"2\", Z: 4.5, V: \"C\"",
-            result);
+        await Assert.That(result).IsEqualTo("T: \"NormalClass\", X: 1, Y: \"2\", Z: 4.5, V: \"C\"");
     }
 
-    [Fact]
-    public void NormalClassTest_ShouldNotWriteClassName()
+    [Test]
+    public async Task NormalClassTest_ShouldNotWriteClassName()
     {
         var assembly = PrepareAssembly("test4",
             new()
@@ -110,15 +105,13 @@ public class AttributesTests
         instance.Z = 4.5;
         instance.V = 'C';
 
-        var result = instance.ToString();
+        string result = instance.ToString();
 
-        Assert.Equal(
-            "{X: 1, Y: \"2\", Z: 4.5, V: \"C\"}",
-            result);
+        await Assert.That(result).IsEqualTo("{X: 1, Y: \"2\", Z: 4.5, V: \"C\"}");
     }
 
-    [Fact]
-    public void NormalClassTest_ShouldStartListWithCustomSeparator()
+    [Test]
+    public async Task NormalClassTest_ShouldStartListWithCustomSeparator()
     {
         var assembly = PrepareAssembly("test5",
             new()
@@ -131,15 +124,15 @@ public class AttributesTests
         instance.Collection = new[] {1, 2, 3, 4, 5, 6};
         instance.Count = 2;
 
-        var result = instance.ToString();
+        string result = instance.ToString();
 
         var expected = $"{{T: \"IntCollection\", Count: 2, Collection: {ListStart}1, 2, 3, 4, 5, 6]}}";
 
-        Assert.Equal(expected, result);
+        await Assert.That(result).IsEqualTo(expected);
     }
 
-    [Fact]
-    public void NormalClassTest_ShouldEndListWithCustomSeparator()
+    [Test]
+    public async Task NormalClassTest_ShouldEndListWithCustomSeparator()
     {
         var assembly = PrepareAssembly("test6",
             new()
@@ -152,10 +145,10 @@ public class AttributesTests
         instance.Collection = new[] {1, 2, 3, 4, 5, 6};
         instance.Count = 2;
 
-        var result = instance.ToString();
+        string result = instance.ToString();
 
         var expected = $"{{T: \"IntCollection\", Count: 2, Collection: [1, 2, 3, 4, 5, 6{ListEnd}}}";
 
-        Assert.Equal(expected, result);
+        await Assert.That(result).IsEqualTo(expected);
     }
 }
